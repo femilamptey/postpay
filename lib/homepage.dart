@@ -1,3 +1,4 @@
+import 'package:afterpay/loginpage.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -19,10 +20,12 @@ class HomePage extends StatelessWidget {
 
     final navDrawer = new Drawer(
       child: ListView(
+        physics: NeverScrollableScrollPhysics(),
         padding: EdgeInsets.zero,
         children: <Widget>[
           new UserAccountsDrawerHeader(
               accountName: Text("Options", style: TextStyle(color: Colors.white, fontSize: 38.0)),
+              accountEmail: null,
               decoration: BoxDecoration(color: Colors.black)),
           new ListTile(
             title: Text("Pending Payments", style: TextStyle(fontSize: 20.0)),
@@ -34,6 +37,7 @@ class HomePage extends StatelessWidget {
             title: Text("Sign Out", style: TextStyle(fontSize: 20.0)),
             onTap: () {
               //TODO
+              Navigator.of(context).pushReplacementNamed(LoginPage.tag);
             },
           )
         ],
@@ -82,7 +86,7 @@ class HomePage extends StatelessWidget {
             )),
             new Container(child: new TextField(
               decoration: new InputDecoration(
-                labelText: "Optional: Reason",
+                labelText: "Reason/Message (Optional)",
               ),
             ),)
           ],
@@ -141,6 +145,7 @@ class HomePage extends StatelessWidget {
         color: Colors.white
       ),
       child: ListView(
+        physics: NeverScrollableScrollPhysics(),
         children: <Widget>[logo, circle],
       ),
     );

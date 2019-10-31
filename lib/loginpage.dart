@@ -58,7 +58,7 @@ class _LoginPageState extends State<LoginPage> {
       backgroundColor: Colors.white,
       body: Container(
         child: ListView(
-          scrollDirection: Axis.vertical,
+          physics: NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           padding: EdgeInsets.only(left: 24.0, right: 24.0, top: 85.0),
           children: <Widget>[
