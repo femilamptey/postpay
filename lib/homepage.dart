@@ -1,5 +1,7 @@
 import 'package:afterpay/loginpage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
 class HomePage extends StatelessWidget {
@@ -11,6 +13,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final RefreshController _refreshController = RefreshController();
 
     final appBar = new AppBar(
       title: Text("Home", style: TextStyle(color: Colors.white, fontSize: 26.0)),
@@ -138,16 +142,25 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.red,
     );
 
-    final body = Container(
-      width: MediaQuery.of(context).size.width,
-      padding: EdgeInsets.all(14.0),
-      decoration: BoxDecoration(
-        color: Colors.white
-      ),
-      child: ListView(
-        physics: NeverScrollableScrollPhysics(),
-        children: <Widget>[logo, circle],
-      ),
+    final body = SmartRefresher(
+      controller: _refreshController,
+      enablePullDown: true,
+      onRefresh: () async {
+        //TODO
+        await Future.delayed(Duration(seconds: 1));
+        _refreshController.refreshCompleted();
+      },
+      child: Container(
+        width: MediaQuery.of(context).size.width,
+        padding: EdgeInsets.all(14.0),
+        decoration: BoxDecoration(
+          color: Colors.white
+        ),
+        child: ListView(
+          physics: NeverScrollableScrollPhysics(),
+          children: <Widget>[logo, circle],
+        ),
+      )
     );
 
     return Scaffold(
