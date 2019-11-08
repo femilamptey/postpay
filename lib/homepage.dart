@@ -1,18 +1,35 @@
 import 'package:afterpay/loginpage.dart';
+import 'package:afterpay/mtnmobilemoney.dart';
+import 'package:afterpay/pendingpayments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
+  static final String tag = 'home-page';
+
+  @override
+  _HomePageState createState() => new _HomePageState();
+
+}
+
+class _HomePageState extends State<HomePage> {
+
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  static String tag = 'home-page';
-  String accountBalance = '5000';
-  String availableBalance = '4400';
-  String currency = 'EUR';
+  static final List<String> _currencies = ['EUR', 'GHS'];
+  double accountBalance = 5000.00;
+  double availableBalance = 4400.00;
+  String _currency = 'EUR';
 
   @override
   Widget build(BuildContext context) {
+
+    //MTNMobileMoney.createAPIUser();
+    MTNMobileMoney.getAPIKey();
+    MTNMobileMoney.getDisbursementToken();
+    MTNMobileMoney.getAccountBalance();
+    //MTNMobileMoney.transferMoney();
 
     final RefreshController _refreshController = RefreshController();
 
@@ -32,15 +49,20 @@ class HomePage extends StatelessWidget {
               accountEmail: null,
               decoration: BoxDecoration(color: Colors.black)),
           new ListTile(
+            title: Text("Home", style: TextStyle(fontSize: 20.0)),
+            onTap: () {
+              //DO NOTHING
+            },
+          ),
+          new ListTile(
             title: Text("Pending Payments", style: TextStyle(fontSize: 20.0)),
             onTap: () {
-              //TODO
+              Navigator.of(context).pushReplacementNamed(PendingPaymentsPage.tag);
             },
           ),
           new ListTile(
             title: Text("Sign Out", style: TextStyle(fontSize: 20.0)),
             onTap: () {
-              //TODO
               Navigator.of(context).pushReplacementNamed(LoginPage.tag);
             },
           )
@@ -51,7 +73,7 @@ class HomePage extends StatelessWidget {
     final logo = Hero(
       tag: 'hero',
       child: Padding(
-        padding: EdgeInsets.all(0.0),
+        padding: EdgeInsets.all(30.0),
           child: Image.asset('assets/heading.jpeg')
       ),
     );
@@ -64,53 +86,7 @@ class HomePage extends StatelessWidget {
       ),
     );
 
-    final initiateTransferDialog =
-      AlertDialog(
-        content: new Column(
-          children: <Widget>[
-            new Container(child: new TextField(
-                keyboardType: TextInputType.number,
-                decoration: new InputDecoration(
-                  labelText: "Recipient's number"
-                ),
-              ),
-            ),
-            new Container(child: new TextField(
-              keyboardType: TextInputType.number,
-              decoration: new InputDecoration(
-                labelText: "Transfer amount"
-              ),
-            )),
-            new Container(child: new TextField(
-              keyboardType: TextInputType.number,
-              obscureText: true,
-              decoration: new InputDecoration(
-                labelText: "MOMO PIN"
-              ),
-            )),
-            new Container(child: new TextField(
-              decoration: new InputDecoration(
-                labelText: "Reason/Message (Optional)",
-              ),
-            ),)
-          ],
-        mainAxisSize: MainAxisSize.min,
-        ),
-        actions: <Widget>[
-          FlatButton(
-            child: const Text('Cancel'),
-            onPressed: () {
-              Navigator.pop(context, 'cancel');
-            },
-          ),
-          FlatButton(
-            child: const Text('Pay'),
-            onPressed: () {
-              Navigator.pop(context, 'discard');
-            },
-          ),
-        ],
-      );
+    final initiateTransferDialog = new InitiateTransferDialog();
 
     final makePaymentButton = Padding(
       padding: EdgeInsets.all(8.0),
@@ -130,10 +106,10 @@ class HomePage extends StatelessWidget {
       radius: 300.0,
       lineWidth: 27.0,
       animation: true,
-      percent: double.parse(availableBalance)/double.parse(accountBalance),
+      percent: availableBalance/accountBalance,
       center: makePaymentButton,
       footer: new Text(
-        "Account Balance: " + accountBalance + " " + currency + "\nAvailable Balance: " + availableBalance + " " + currency,
+        "Account Balance: $accountBalance  " + _currency + "\nAvailable Balance: $availableBalance " + _currency,
         style:
         new TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
       ),
@@ -147,7 +123,12 @@ class HomePage extends StatelessWidget {
       enablePullDown: true,
       onRefresh: () async {
         //TODO
-        await Future.delayed(Duration(seconds: 1));
+        await Future.delayed(Duration(seconds: 3));
+        setState(() {
+          //TODO: DELETE LATER, THIS IS JUST A TEST
+          availableBalance -= 200;
+          accountBalance -= 100;
+        });
         _refreshController.refreshCompleted();
       },
       child: Container(
@@ -182,5 +163,101 @@ class HomePage extends StatelessWidget {
         ));
       }
     });
+  }
+}
+
+class InitiateTransferDialog extends StatefulWidget {
+  const InitiateTransferDialog({this.onValueChange, this.initialValue});
+
+  final String initialValue;
+  final void Function(String) onValueChange;
+
+  @override
+  State createState() => new InitiateTransferDialogState();
+}
+
+class InitiateTransferDialogState extends State<InitiateTransferDialog> {
+  String _currency = 'EUR';
+  static final List<String> _currencies = ['EUR', 'GHS'];
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  void _onDropDownChanged(String val) {
+    setState(() {
+      this._currency = val;
+    });
+  }
+
+  Widget build(BuildContext context) {
+    return new AlertDialog(
+      content: new Column(
+        children: <Widget>[
+          new Container(child: new TextField(
+            keyboardType: TextInputType.number,
+            decoration: new InputDecoration(
+                labelText: "Recipient's number"
+            ),
+          ),
+          ),
+          new Container(child: new TextField(
+            keyboardType: TextInputType.number,
+            decoration: new InputDecoration(
+                labelText: "Transfer amount"
+            ),
+          )),
+          new Container(child:
+          InputDecorator(
+            decoration: const InputDecoration(
+              labelText: 'Currency',
+              contentPadding: EdgeInsets.zero,
+            ),
+            isEmpty: _currency == null,
+            child: DropdownButton<String>(
+              value: _currency,
+              onChanged: (String newValue) {
+                _onDropDownChanged(newValue);
+              },
+              items: _currencies.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          )
+          ),
+          new Container(child: new TextField(
+            keyboardType: TextInputType.number,
+            obscureText: true,
+            decoration: new InputDecoration(
+                labelText: "MOMO PIN"
+            ),
+          )),
+          new Container(child: new TextField(
+            decoration: new InputDecoration(
+              labelText: "Reason/Message (Optional)",
+            ),
+          ),)
+        ],
+        mainAxisSize: MainAxisSize.min,
+      ),
+      actions: <Widget>[
+        FlatButton(
+          child: const Text('Cancel'),
+          onPressed: () {
+            Navigator.pop(context, 'cancel');
+          },
+        ),
+        FlatButton(
+          child: const Text('Next'),
+          onPressed: () {
+            Navigator.pop(context, 'discard');
+          },
+        ),
+      ],
+    );
   }
 }
