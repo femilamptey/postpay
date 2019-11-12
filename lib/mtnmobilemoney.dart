@@ -99,9 +99,9 @@ class MTNMobileMoney {
 
   }
 
-  static Future<List<String>> getAccountBalance() async {
+  static Future<List<Object>> getAccountBalance() async {
 
-    var availableBalance = '';
+    var availableBalance = 0.0;
     var currency = '';
 
     var client = AltHttpClient();
@@ -119,7 +119,7 @@ class MTNMobileMoney {
       print(response.reasonPhrase);
       response.transform(utf8.decoder).listen((contents) {
         // handle data
-        availableBalance = json.decode(contents)['availableBalance'];
+        availableBalance = double.parse(json.decode(contents)['availableBalance']);
         print(availableBalance);
         currency = json.decode(contents)['currency'];
         print(currency);

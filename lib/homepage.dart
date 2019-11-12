@@ -27,16 +27,24 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
   }
 
   @override
   Widget build(BuildContext context) {
 
-    MTNMobileMoney.createAPIUser();
+    //MTNMobileMoney.createAPIUser();
     MTNMobileMoney.getAPIKey();
     MTNMobileMoney.getDisbursementToken();
-    MTNMobileMoney.getAccountBalance();
+
+    //TODO: Handle Negative and 0 values
+    var results = MTNMobileMoney.getAccountBalance().then((array) {
+      accountBalance = array[0];
+      accountBalance +=  200.0;
+      availableBalance = accountBalance - 25;
+      print(availableBalance/accountBalance);
+      _currency = array[1];
+    });
+
     //MTNMobileMoney.transferMoney();
 
     final RefreshController _refreshController = RefreshController();
