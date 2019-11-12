@@ -27,8 +27,8 @@ class DBProvider {
       await db.execute("CREATE TABLE Accounts ("
           "accountNo INTEGER PRIMARY KEY,"
           "PIN Integer,"
-          "accountBalance TEXT,"
-          "availableBalance TEXT,"
+          "accountBalance REAL,"
+          "availableBalance REAL,"
           "apiKey TEXT"
           ")");
     });

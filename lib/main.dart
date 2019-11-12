@@ -1,3 +1,5 @@
+import 'package:afterpay/confirmpaymentpage.dart';
+import 'package:afterpay/loader.dart';
 import 'package:afterpay/pendingpayments.dart';
 import 'package:flutter/material.dart';
 import 'package:afterpay/loginpage.dart';
@@ -10,6 +12,7 @@ class MyApp extends StatelessWidget {
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),
     PendingPaymentsPage.tag: (context) => PendingPaymentsPage(),
+    ColorLoader.tag: (context) => ColorLoader(),
   };
 
   @override

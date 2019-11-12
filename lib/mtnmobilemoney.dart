@@ -5,6 +5,7 @@ import 'dart:ffi';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:alt_http/alt_http.dart';
 import 'package:uuid/uuid.dart';
 
 class MTNMobileMoney {
@@ -28,50 +29,45 @@ class MTNMobileMoney {
 
   static Future<http.Response> createAPIUser() async {
 
+    var client = AltHttpClient();
+
     var data = {
       'providerCallbackHost' : 'string'
     };
 
-    var headers = {
-      'X-Reference-Id': _referenceID,
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': _disbursementKey,
-    };
+    var req = await client.postUrl(Uri.https(_hostURL, _createAPIUserURL)).then((HttpClientRequest request) {
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      request.write(data);
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _createAPIUserURL));
+      print(response.statusCode);
+      print(response.reasonPhrase);
+    });
 
-    var body = json.encode(data);
-
-    var response = await http.post(
-      Uri.https(_hostURL, _createAPIUserURL),
-      headers: headers,
-      body: body,
-    );
-
-    print(response.statusCode);
-    print(response.body);
-
-    return response;
   }
 
   static Future<http.Response> getAPIKey() async {
 
-    var headers = {
-      'X-Reference-Id': _referenceID,
-      'Ocp-Apim-Subscription-Key': _disbursementKey
-    };
+    var client = AltHttpClient();
 
-    var response = await http.post(
-      Uri.https(_hostURL, _getAPIKeyURL),
-      headers: headers,
-    ).then((http.Response response) {
-      print(Uri.https(_hostURL, _getAPIKeyURL).toString());
+    var req = await client.postUrl(Uri.https(_hostURL, _getAPIKeyURL,)).then((HttpClientRequest request) {
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      return request.close();
+    }).then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _getAPIKeyURL));
       print(response.statusCode);
-      print(response.body);
-
-      _apiKey = json.decode(response.body)['apiKey'];
-
-      return response;
+      print(response.reasonPhrase);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+        _apiKey = json.decode(contents)['apiKey'];
+        print(_apiKey);
+      });
     });
-
   }
 
   static Future<http.Response> getDisbursementToken() async {
@@ -83,41 +79,54 @@ class MTNMobileMoney {
       'Ocp-Apim-Subscription-Key': _disbursementKey
     };
 
-    var response = await http.post(
-      Uri.https(_hostURL, _getDisbursementTokenURL),
-      headers: headers,
-    ).then((http.Response response) {
-      print(Uri.https(_hostURL, _getDisbursementTokenURL).toString());
-      print(base64.encode(utf8.encode(credentials)));
-      print(response.statusCode);
-      print(response.body);
+    var client = AltHttpClient();
 
-      _accessToken = json.decode(response.body)['access_token'];
+    var req = await client.postUrl(Uri.https(_hostURL, _getDisbursementTokenURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Basic ' + base64.encode(utf8.encode(credentials)));
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _getDisbursementTokenURL));
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+        _accessToken = json.decode(contents)['access_token'];
+        print(_accessToken);
+      });
     });
 
   }
 
-  static Future<http.Response> getAccountBalance() async {
+  static Future<List<String>> getAccountBalance() async {
 
-    var headers = {
-      'Authorization': 'Bearer $_accessToken',
-      'X-Reference-Id': _referenceID,
-      'X-Target-Environment': 'sandbox',
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': _disbursementKey
-    };
+    var availableBalance = '';
+    var currency = '';
 
-    var response = await http.get(
-      Uri.https(_hostURL, _getAccountBalanceURL),
-      headers: headers,
-    ).then((http.Response response) {
-      print(Uri.https(_hostURL, _getAccountBalanceURL).toString());
+    var client = AltHttpClient();
+
+    var req = await client.getUrl(Uri.https(_hostURL, _getAccountBalanceURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('X-Target-Environment', 'sandbox');
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _getAccountBalanceURL));
       print(response.statusCode);
       print(response.reasonPhrase);
-      print(response.body);
-      print(response.request.headers);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+        availableBalance = json.decode(contents)['availableBalance'];
+        print(availableBalance);
+        currency = json.decode(contents)['currency'];
+        print(currency);
+      });
     });
 
+    return [availableBalance, currency];
   }
 
   static Future<http.Response> transferMoney() async {

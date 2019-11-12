@@ -1,3 +1,4 @@
+import 'package:afterpay/confirmpaymentpage.dart';
 import 'package:afterpay/loginpage.dart';
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:afterpay/pendingpayments.dart';
@@ -23,9 +24,16 @@ class _HomePageState extends State<HomePage> {
   String _currency = 'EUR';
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+  }
+
+  @override
   Widget build(BuildContext context) {
 
-    //MTNMobileMoney.createAPIUser();
+    MTNMobileMoney.createAPIUser();
     MTNMobileMoney.getAPIKey();
     MTNMobileMoney.getDisbursementToken();
     MTNMobileMoney.getAccountBalance();
@@ -192,6 +200,17 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
   }
 
   Widget build(BuildContext context) {
+
+    String payee;
+    double amount;
+    String message = '';
+    int MOMOPin;
+
+    final payeeFieldController = TextEditingController();
+    final amountFieldController = TextEditingController();
+    final messageFieldController = TextEditingController();
+    final MOMOPinFieldController = TextEditingController();
+
     return new AlertDialog(
       content: new Column(
         children: <Widget>[
@@ -200,6 +219,10 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
             decoration: new InputDecoration(
                 labelText: "Recipient's number"
             ),
+            onChanged: (text) {
+              payee = text;
+            },
+            controller: payeeFieldController,
           ),
           ),
           new Container(child: new TextField(
@@ -207,6 +230,10 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
             decoration: new InputDecoration(
                 labelText: "Transfer amount"
             ),
+            onChanged: (text) {
+              amount = double.parse(text);
+            },
+            controller: amountFieldController,
           )),
           new Container(child:
           InputDecorator(
@@ -235,12 +262,20 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
             decoration: new InputDecoration(
                 labelText: "MOMO PIN"
             ),
+            onChanged: (text) {
+              MOMOPin = int.parse(text);
+            },
+            controller: MOMOPinFieldController,
           )),
           new Container(child: new TextField(
             decoration: new InputDecoration(
               labelText: "Reason/Message (Optional)",
             ),
-          ),)
+            onChanged: (text) {
+              message = text;
+            },
+            controller: messageFieldController,
+          ))
         ],
         mainAxisSize: MainAxisSize.min,
       ),
@@ -254,7 +289,19 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
         FlatButton(
           child: const Text('Next'),
           onPressed: () {
-            Navigator.pop(context, 'discard');
+            if (amount != null || payee != null || MOMOPin != null) {
+              Navigator.pop(context, 'cancel');
+              Navigator.push(context,
+                  MaterialPageRoute(
+                    builder: (context) =>
+                        ConfirmPaymentPage(
+                            payee, amount, _currency, message, MOMOPin),
+                  ));
+            } else {
+              Scaffold.of(context).showSnackBar(SnackBar(
+                content: Text("Please fill required fields."),
+              ));
+            }
           },
         ),
       ],
