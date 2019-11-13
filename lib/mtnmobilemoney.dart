@@ -155,15 +155,25 @@ class MTNMobileMoney {
       'Ocp-Apim-Subscription-Key': _disbursementKey
     };
 
-    var response = await http.post(
-      Uri.https(_hostURL, _transferMoneyURL),
-      headers: headers,
-      body: body
-    );
+    var client = AltHttpClient();
 
-    print(Uri.https(_hostURL, _transferMoneyURL).toString());
-    print(response.statusCode);
-    print(response.body);
+    var req = await client.postUrl(Uri.https(_hostURL, _transferMoneyURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('X-Target-Environment', 'sandbox');
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      request.write(body);
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _transferMoneyURL));
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+        print(json.decode(contents));
+      });
+    });
 
     checkTransactionStatus();
 
@@ -179,14 +189,24 @@ class MTNMobileMoney {
       'Ocp-Apim-Subscription-Key': _disbursementKey
     };
 
-    var response = await http.get(
-      Uri.https(_hostURL, _checkTransferStatusURL),
-      headers: headers,
-    );
 
-    print(Uri.https(_hostURL, _checkTransferStatusURL).toString());
-    print(response.statusCode);
-    print(response.body);
+    var client = AltHttpClient();
+
+    var req = await client.getUrl(Uri.https(_hostURL, _checkTransferStatusURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('X-Target-Environment', 'sandbox');
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _checkTransferStatusURL));
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+      });
+    });
 
   }
 
