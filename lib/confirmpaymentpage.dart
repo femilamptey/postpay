@@ -32,6 +32,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
 
   @override
   Widget build(BuildContext context) {
+
     // TODO: implement build
     final _scaffoldKey = GlobalKey<ScaffoldState>();
     final half = (0.5 * _amount).toStringAsFixed(2);
@@ -65,7 +66,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               setState(() {
                 isLoading = true;
               });
-              showDialog(context: context, builder: (context) => new ConfirmationDialog("6 Weeks", half, halfWeekly, _currency, _payee, context));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog("6 Weeks", half, halfWeekly, _currency, _payee, context));
             },
             color: Colors.lightBlue,
           )
@@ -76,7 +77,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
             child: Text('25%\n\nPay $_currency $quarter now\n\nPay $quarterWeekly weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
-              showDialog(context: context, builder: (context) => new ConfirmationDialog("4 Weeks", quarter, quarterWeekly, _currency, _payee, context));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog("4 Weeks", quarter, quarterWeekly, _currency, _payee, context));
             },
             color: Colors.green,
           )
@@ -87,7 +88,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               child: Text('10%\n\nPay $_currency $ten now\n\nPay $tenWeekly weekly over 2 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, builder: (context) => new ConfirmationDialog("2 Weeks", ten, tenWeekly, _currency, _payee, context));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog("2 Weeks", ten, tenWeekly, _currency, _payee, context));
               },
               color: Colors.yellow,
             )        ),
@@ -97,7 +98,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               child: Text('5%\n\nPay $_currency $five now\n\n Pay $fiveDaily daily over one week', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, builder: (context) => new ConfirmationDialog("7 Days", five, fiveDaily, _currency, _payee, context));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog("7 Days", five, fiveDaily, _currency, _payee, context));
               },
               color: Colors.red,
             )        ),
@@ -112,33 +113,31 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
     );
   }
 
+
 }
 
 
 class ConfirmationDialog extends StatefulWidget {
-  ConfirmationDialog(this.selectedPlan, this.upFrontPaymentAmount, this.planPaymentAmount, this.currency, this.payee, this.contextOfPage);
+  ConfirmationDialog(this.selectedPlan, this.upFrontPaymentAmount, this.planPaymentAmount, this.currency, this.payee, this.contextOfPage, {this.message = ''});
 
   final String selectedPlan;
   final String upFrontPaymentAmount;
   final String planPaymentAmount;
   final String currency;
   final String payee;
+  final String message;
   final BuildContext contextOfPage;
 
   @override
-  State createState() => new ConfirmationDialogState(selectedPlan, upFrontPaymentAmount, planPaymentAmount, currency, payee, contextOfPage);
+  State createState() => new ConfirmationDialogState();
 }
 
 class ConfirmationDialogState extends State<ConfirmationDialog> {
 
-  ConfirmationDialogState(this.selectedPlan, this.upFrontPaymentAmount, this.planPaymentAmount, this.currency, this.payee, this.contextOfPage);
+  bool _isButtonDisabled = false;
+  Color _isClickedColor = Colors.black;
 
-  final String selectedPlan;
-  final String upFrontPaymentAmount;
-  final String planPaymentAmount;
-  final String currency;
-  final String payee;
-  final BuildContext contextOfPage;
+  ConfirmationDialogState();
 
   @override
   void initState() {
@@ -150,26 +149,45 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
     return new AlertDialog(
       content: new Column(
         children: <Widget>[
-          Text("Plan: $selectedPlan"),
-          Text("Paid to: $payee"),
-          Text("Upfront Payment: $upFrontPaymentAmount $currency"),
-          Text("Recurring charge: $planPaymentAmount $currency")
+          Text("Plan: ${widget.selectedPlan}"),
+          Text("Paid to: ${widget.payee}"),
+          Text("Upfront Payment: ${widget.upFrontPaymentAmount} ${widget.currency}"),
+          Text("Recurring charge: ${widget.planPaymentAmount} ${widget.currency}")
         ],
         mainAxisSize: MainAxisSize.min,
       ),
       actions: <Widget>[
         FlatButton(
-          child: const Text('Cancel'),
+          child: Text('Cancel', style: TextStyle(color: _isClickedColor)),
           onPressed: () {
-            Navigator.pop(context);
+            if (!_isButtonDisabled) {
+              Navigator.pop(context);
+            }
           },
         ),
         FlatButton(
-          child: const Text('Pay'),
+          child: Text('Pay', style: TextStyle(color: _isClickedColor)),
           onPressed: () async {
-            MTNMobileMoney.transferMoney();
-            Navigator.pop(context, 'cancel');
-            Navigator.pushReplacementNamed(context, ColorLoader.tag);
+            if (!_isButtonDisabled) {
+              setState(() {
+                _isButtonDisabled = true;
+                _isClickedColor = Colors.grey;
+              });
+              MTNMobileMoney.createAPIUser().then((response) {
+                MTNMobileMoney.getAPIKey().then((response) {
+                  MTNMobileMoney.getDisbursementToken().then((response) {
+                    MTNMobileMoney.transferMoney(
+                        double.parse(widget.upFrontPaymentAmount), widget.currency,
+                        widget.payee, widget.message).then((response) {
+                      Navigator.pop(context, 'cancel');
+                      Navigator.pushReplacementNamed(context, ColorLoader.tag);
+                    });
+                  });
+                });
+              });
+            } else {
+
+            }
           },
         ),
       ],

@@ -236,7 +236,7 @@ class Arc3Painter extends CustomPainter {
 class TransactionStatusDialog extends StatefulWidget {
   TransactionStatusDialog(this.status);
 
-  int status;
+  final int status;
 
   @override
   State createState() => new TransactionStatusDialogState();

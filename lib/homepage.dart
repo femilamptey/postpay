@@ -32,10 +32,6 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
 
-    //MTNMobileMoney.createAPIUser();
-    MTNMobileMoney.getAPIKey();
-    MTNMobileMoney.getDisbursementToken();
-
     /*TODO: Handle Negative and 0 values
     MTNMobileMoney.getAccountBalance().then((array) {
       accountBalance = array[0];

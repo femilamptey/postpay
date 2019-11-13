@@ -14,20 +14,44 @@ class MTNMobileMoney {
   static final MTNMobileMoney _mtnMOMO = MTNMobileMoney._();
   static String _apiKey = '';
   static String _accessToken = '';
-  //static final _referenceID = Uuid().v4();
-  static final _referenceID = 'cd0f4b28-3de1-4148-bf2e-aa3543dc5be2';
+  static String _referenceID = '';
+  //static final _referenceID = 'cd0f4b28-3de1-4148-bf2e-aa3543dc5be2';
   static final _hostURL = 'sandbox.momodeveloper.mtn.com';
   static final _createAPIUserURL = '/v1_0/apiuser';
-  static final _getAPIKeyURL = '/v1_0/apiuser/' + _referenceID + '/apikey';
+  static var _getAPIKeyURL = '/v1_0/apiuser/' + _referenceID + '/apikey';
   static final _getDisbursementTokenURL = '/disbursement/token/';
   static final _getAccountBalanceURL = '/disbursement/v1_0/account/balance';
   static final _transferMoneyURL = '/disbursement/v1_0/transfer';
-  static final _checkTransferStatusURL = '/disbursement/v1_0/transfer/' + _referenceID;
+  static var _checkTransferStatusURL = '/disbursement/v1_0/transfer/' + _referenceID;
 
   static final String _collectionsKey = 'df26565ecc4c4abe94ca3f0dae9bd5c9';
   static final String _disbursementKey = 'd89864081c2749c183c7457204ffb74a';
 
-  static Future<http.Response> createAPIUser() async {
+  static _setReferenceID(String value) {
+    _referenceID = value;
+  }
+
+  static _setAPIKeyURL(String value) {
+    _getAPIKeyURL = '/v1_0/apiuser/' + value + '/apikey';
+  }
+
+  static _setCheckTransferStatusURL(String value) {
+    _checkTransferStatusURL = '/disbursement/v1_0/transfer/' + value;
+  }
+
+  static _setAPIKey(String value) {
+    _apiKey = value;
+  }
+
+  static _setAccessToken(String value) {
+    _accessToken = value;
+  }
+
+  static Future<HttpClientResponse> createAPIUser() async {
+
+    _setReferenceID(Uuid().v4());
+    _setAPIKeyURL(_referenceID);
+    _setCheckTransferStatusURL(_referenceID);
 
     var client = AltHttpClient();
 
@@ -35,7 +59,7 @@ class MTNMobileMoney {
       'providerCallbackHost' : 'string'
     };
 
-    var req = await client.postUrl(Uri.https(_hostURL, _createAPIUserURL)).then((HttpClientRequest request) {
+    HttpClientResponse response = await client.postUrl(Uri.https(_hostURL, _createAPIUserURL)).then((HttpClientRequest request) {
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
       request.headers.contentType = ContentType.json;
@@ -45,40 +69,52 @@ class MTNMobileMoney {
       print(Uri.https(_hostURL, _createAPIUserURL));
       print(response.statusCode);
       print(response.reasonPhrase);
+      print(_referenceID);
+      return response;
     });
 
+    return response;
   }
 
-  static Future<http.Response> getAPIKey() async {
+  static Future<HttpClientResponse> getAPIKey() async {
 
-    var client = AltHttpClient();
+      var client = AltHttpClient();
+      var ap = '';
 
-    var req = await client.postUrl(Uri.https(_hostURL, _getAPIKeyURL,)).then((HttpClientRequest request) {
-      request.headers.add('X-Reference-Id', _referenceID);
-      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
-      request.headers.contentType = ContentType.json;
-      return request.close();
-    }).then((HttpClientResponse response) {
-      print(Uri.https(_hostURL, _getAPIKeyURL));
-      print(response.statusCode);
-      print(response.reasonPhrase);
-      response.transform(utf8.decoder).listen((contents) {
-        // handle data
-        _apiKey = json.decode(contents)['apiKey'];
-        print(_apiKey);
+      HttpClientResponse response = await client.postUrl(Uri.https(_hostURL, _getAPIKeyURL,)).then((
+          HttpClientRequest request) {
+        request.headers.add('X-Reference-Id', _referenceID);
+        request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+        request.headers.contentType = ContentType.json;
+        return request.close();
+      }).then((HttpClientResponse response) async {
+        print(Uri.https(_hostURL, _getAPIKeyURL));
+        print(response.statusCode);
+        print(response.reasonPhrase);
+        response.transform(utf8.decoder).listen((contents) {
+          // handle data
+          ap = json.decode(contents)['apiKey'];
+          _setAPIKey(ap);
+          print(_apiKey);
+        }).onDone(() {
+
+        });
+
+        return response;
       });
-    });
+
+      return response;
   }
 
-  static Future<http.Response> getDisbursementToken() async {
+  static Future<HttpClientResponse> getDisbursementToken() async {
 
     String credentials = '$_referenceID:$_apiKey';
     String basicCred = base64.encode(utf8.encode(credentials));
 
     var client = AltHttpClient();
 
-    var req = await client.postUrl(Uri.https(_hostURL, _getDisbursementTokenURL)).then((HttpClientRequest request) {
-      request.headers.add('Authorization', 'Basic $basicCred');
+    HttpClientResponse response = await client.postUrl(Uri.https(_hostURL, _getDisbursementTokenURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Basic ${base64.encode(utf8.encode(credentials))}');
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
       request.headers.contentType = ContentType.json;
       return request.close();
@@ -86,13 +122,19 @@ class MTNMobileMoney {
       print(Uri.https(_hostURL, _getDisbursementTokenURL));
       print(response.statusCode);
       print(response.reasonPhrase);
+      print(credentials);
       response.transform(utf8.decoder).listen((contents) {
         // handle data
-        _accessToken = json.decode(contents)['access_token'];
+        var at = json.decode(contents)['access_token'];
+        _setAccessToken(json.decode(contents)['access_token']);
         print(_accessToken);
+      }).onDone(() {
+
       });
+      return response;
     });
 
+    return response;
   }
 
   static Future<List<String>> getAccountBalance() async {
@@ -131,17 +173,17 @@ class MTNMobileMoney {
 
   }
 
-  static Future<http.Response> transferMoney() async {
+  static Future<HttpClientResponse> transferMoney(double amount, String currency, String payee, String message) async {
 
     var data = {
-      "amount": "5000",
-      "currency": "EUR",
+      "amount": "$amount",
+      "currency": "$currency",
       "externalId": "12345",
       "payee": {
         "partyIdType": "MSISDN",
-        "partyId": "0780123456"
+        "partyId": "$payee"
       },
-      "payerMessage": "test message",
+      "payerMessage": "$message",
       "payeeNote": "test note"
     };
 
@@ -151,7 +193,7 @@ class MTNMobileMoney {
 
     var client = AltHttpClient();
 
-    var req = await client.postUrl(Uri.https(_hostURL, _transferMoneyURL)).then((HttpClientRequest request) {
+    HttpClientResponse response = await client.postUrl(Uri.https(_hostURL, _transferMoneyURL)).then((HttpClientRequest request) {
       request.headers.add('Authorization', 'Bearer $_accessToken');
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('X-Target-Environment', 'sandbox');
@@ -167,8 +209,10 @@ class MTNMobileMoney {
         // handle data
         print(json.decode(contents));
       });
+      return response;
     });
 
+    return response;
   }
 
   static Future<HttpClientResponse> checkTransactionStatus() async {
