@@ -99,9 +99,9 @@ class MTNMobileMoney {
 
   }
 
-  static Future<List<Object>> getAccountBalance() async {
+  static Future<List<String>> getAccountBalance() async {
 
-    var availableBalance = 0.0;
+    var availableBalance = '0.0';
     var currency = '';
 
     var client = AltHttpClient();
@@ -113,20 +113,26 @@ class MTNMobileMoney {
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
       request.headers.contentType = ContentType.json;
       return request.close();
+    // ignore: missing_return
     }). then((HttpClientResponse response) {
       print(Uri.https(_hostURL, _getAccountBalanceURL));
       print(response.statusCode);
       print(response.reasonPhrase);
-      response.transform(utf8.decoder).listen((contents) {
-        // handle data
-        availableBalance = double.parse(json.decode(contents)['availableBalance']);
-        print(availableBalance);
-        currency = json.decode(contents)['currency'];
-        print(currency);
-      });
+      if (response.statusCode != 200) {
+        return[3000.00, "GHS"];
+      } else {
+        response.transform(utf8.decoder).listen((contents) {
+          // handle data
+          availableBalance = json.decode(contents)['availableBalance'];
+          print(availableBalance);
+          currency = json.decode(contents)['currency'];
+          print(currency);
+        });
+      }
     });
 
     return [availableBalance, currency];
+
   }
 
   static Future<http.Response> transferMoney() async {
@@ -212,13 +218,26 @@ class MTNMobileMoney {
 
 }
 
+enum PaymentPlan {
+  HALF,
+  QUARTER,
+  TEN,
+  FIVE
+}
+
 class MOMOTransaction {
 
-  final Double _amount;
+  final double _amount;
   final String _currency;
   final String _message;
 
   MOMOTransaction(this._amount, this._currency, this._message);
+
+  double get getAmount { return this._amount; }
+
+  String get getCurrency { return this._currency; }
+
+  String get getMessage { return this._message; }
 
 }
 
@@ -226,10 +245,94 @@ class AfterPayTransaction{
 
   final String _payee;
   final String _payer;
-  final Double _initialPaymentAmount;
-  final Queue<MOMOTransaction> _transactions;
+  final double _totalAmount;
+  final PaymentPlan _plan;
+  double _initialPaymentAmount;
+  Queue<MOMOTransaction> _transactions;
+  Queue<MOMOTransaction> _completedTransactions;
+  Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._payer, this._initialPaymentAmount, this._transactions, this._completed);
+  AfterPayTransaction(this._payee, this._payer, this._totalAmount, this._plan, String currency, String message) {
+    //TODO: Initialise _completedTransactions and _remainingTransactions
+    double remainder = 0.0;
+    double recurringCharge = 0.0;
+
+    switch (_plan) {
+      case PaymentPlan.HALF:
+        _initialPaymentAmount = _totalAmount * 0.5;
+        remainder = _totalAmount * 0.5;
+        recurringCharge = remainder / 6;
+        _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
+        _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
+        for (var i = 0; i < 6; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.QUARTER:
+        _initialPaymentAmount = _totalAmount * 0.25;
+        remainder = _totalAmount * 0.75;
+        recurringCharge = remainder / 4;
+        _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
+        _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
+        for (var i = 0; i < 4; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.TEN:
+        _initialPaymentAmount = _totalAmount * 0.10;
+        remainder = _totalAmount * 0.90;
+        recurringCharge = remainder / 2;
+        _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
+        _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
+        for (var i = 0; i < 2; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.FIVE:
+        _initialPaymentAmount = _totalAmount * 0.05;
+        remainder = _totalAmount * 0.95;
+        recurringCharge = remainder / 7;
+        _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
+        _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
+        for (var i = 0; i < 7; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+    }
+    _completed = false;
+  }
+
+  completeNextTransaction() {
+    if (this.isCompleted == false) {
+      var nextTransaction = _remainingTransactions.removeFirst();
+      //TODO: Process the next transaction. If successful, add it to the _completedTransactions, if not, return it to the first of the _remainingTransactions
+      if (_remainingTransactions.isEmpty) {
+        _completed = true;
+      }
+      _completedTransactions.add(nextTransaction);
+    } else {
+      //TODO: Notify them that it's a completed transaction.
+    }
+  }
+
+  double get initialPayment { return this._initialPaymentAmount; }
+
+  String get payee { return this._payee; }
+
+  String get payer { return this._payer; }
+
+  Queue<MOMOTransaction> get allTransactions { return this._transactions; }
+
+  Queue<MOMOTransaction> get remainingTransactions { return this._remainingTransactions; }
+
+  Queue<MOMOTransaction> get completedTransactions { return this._completedTransactions; }
+
+  PaymentPlan get paymentPlan { return this._plan; }
+
+  bool get isCompleted { return this._completed; }
 
 }

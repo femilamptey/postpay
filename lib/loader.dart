@@ -103,16 +103,21 @@ class _ColorLoaderState extends State<ColorLoader> with TickerProviderStateMixin
       ),
     );
 
-    var body = Stack(
-      children: [
-        new Opacity(
-          opacity: 1.0,
-          child: const ModalBarrier(dismissible: false, color: Colors.black),
-        ),
-        new Center(
-          child: loader,
-        ),
-      ],
+    var body = WillPopScope(
+        onWillPop: () async {
+          return false;
+        },
+        child: Stack(
+            children: [
+            new Opacity(
+              opacity: 1.0,
+              child: const ModalBarrier(dismissible: false, color: Colors.white),
+            ),
+            new Center(
+              child: loader,
+            ),
+          ],
+        )
     );
 
     return Scaffold(
@@ -123,6 +128,7 @@ class _ColorLoaderState extends State<ColorLoader> with TickerProviderStateMixin
             isLoading = true;
           });
         },
+        backgroundColor: Colors.transparent,
       ),
     );
   }

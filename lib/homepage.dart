@@ -36,14 +36,14 @@ class _HomePageState extends State<HomePage> {
     MTNMobileMoney.getAPIKey();
     MTNMobileMoney.getDisbursementToken();
 
-    //TODO: Handle Negative and 0 values
-    var results = MTNMobileMoney.getAccountBalance().then((array) {
+    /*TODO: Handle Negative and 0 values
+    MTNMobileMoney.getAccountBalance().then((array) {
       accountBalance = array[0];
-      accountBalance +=  200.0;
+      accountBalance = accountBalance + 100.0;
       availableBalance = accountBalance - 25;
       print(availableBalance/accountBalance);
       _currency = array[1];
-    });
+    });*/
 
     //MTNMobileMoney.transferMoney();
 
@@ -122,10 +122,10 @@ class _HomePageState extends State<HomePage> {
       radius: 300.0,
       lineWidth: 27.0,
       animation: true,
-      percent: availableBalance/accountBalance,
+      percent: (availableBalance/accountBalance).abs(),
       center: makePaymentButton,
       footer: new Text(
-        "Account Balance: $accountBalance  " + _currency + "\nAvailable Balance: $availableBalance " + _currency,
+        "Account Balance: $accountBalance " + _currency + "\nAvailable Balance: $availableBalance " + _currency,
         style:
         new TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
       ),
@@ -139,11 +139,11 @@ class _HomePageState extends State<HomePage> {
       enablePullDown: true,
       onRefresh: () async {
         //TODO
-        await Future.delayed(Duration(seconds: 3));
-        setState(() {
-          //TODO: DELETE LATER, THIS IS JUST A TEST
-          availableBalance -= 200;
-          accountBalance -= 100;
+        await Future.delayed(Duration(seconds: 5), () {
+          setState(() {
+            //TODO: Refresh
+
+          });
         });
         _refreshController.refreshCompleted();
       },
