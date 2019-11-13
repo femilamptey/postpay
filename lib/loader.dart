@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -15,8 +18,6 @@ class ColorLoader extends StatefulWidget {
 }
 
 class _ColorLoaderState extends State<ColorLoader> with TickerProviderStateMixin {
-
-  bool isLoading = false;
 
   Animation<double> animation1;
   Animation<double> animation2;
@@ -107,29 +108,32 @@ class _ColorLoaderState extends State<ColorLoader> with TickerProviderStateMixin
         onWillPop: () async {
           return false;
         },
-        child: Stack(
-            children: [
-            new Opacity(
-              opacity: 1.0,
-              child: const ModalBarrier(dismissible: false, color: Colors.white),
-            ),
-            new Center(
-              child: loader,
-            ),
-          ],
+        child: FutureBuilder(
+          future: MTNMobileMoney.checkTransactionStatus(),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              var data = snapshot.data as HttpClientResponse;
+              var status = data.statusCode;
+              return TransactionStatusDialog(status);
+            } else {
+              return Stack(
+                children: [
+                  new Opacity(
+                    opacity: 1.0,
+                    child: const ModalBarrier(dismissible: false, color: Colors.white),
+                  ),
+                  new Center(
+                    child: loader,
+                  ),
+                ],
+              );
+            }
+          },
         )
     );
 
     return Scaffold(
-      body: isLoading ? TransactionStatusDialog() : body,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          setState(() {
-            isLoading = true;
-          });
-        },
-        backgroundColor: Colors.transparent,
-      ),
+      body: body,
     );
   }
 
@@ -230,7 +234,9 @@ class Arc3Painter extends CustomPainter {
 }
 
 class TransactionStatusDialog extends StatefulWidget {
-  TransactionStatusDialog();
+  TransactionStatusDialog(this.status);
+
+  int status;
 
   @override
   State createState() => new TransactionStatusDialogState();
@@ -247,12 +253,23 @@ class TransactionStatusDialogState extends State<TransactionStatusDialog> {
 
   Widget build(BuildContext context) {
 
+    var titleText;
+    var contentText;
+
+    if (widget.status != 200) {
+      titleText = "Error";
+      contentText = "There was an error with the server. Kindly try again later.";
+    } else {
+      titleText = "Success";
+      contentText = "Afterpay payment successful.";
+    }
+
     return new AlertDialog(
-      title: Text("Done"),
-      content: Text("Completed transaction."),
+      title: Text(titleText),
+      content: Text(contentText),
       actions: <Widget>[
         FlatButton(
-          child: const Text('Done'),
+          child: Text("Done"),
           onPressed: () {
             Navigator.pop(context);
           },

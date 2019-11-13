@@ -1,4 +1,5 @@
 import 'package:afterpay/loader.dart';
+import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -166,6 +167,7 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
         FlatButton(
           child: const Text('Pay'),
           onPressed: () async {
+            MTNMobileMoney.transferMoney();
             Navigator.pop(context, 'cancel');
             Navigator.pushReplacementNamed(context, ColorLoader.tag);
           },

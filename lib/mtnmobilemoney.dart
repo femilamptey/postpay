@@ -73,16 +73,12 @@ class MTNMobileMoney {
   static Future<http.Response> getDisbursementToken() async {
 
     String credentials = '$_referenceID:$_apiKey';
-
-    var headers = {
-      'Authorization': 'Basic ' + base64.encode(utf8.encode(credentials)),
-      'Ocp-Apim-Subscription-Key': _disbursementKey
-    };
+    String basicCred = base64.encode(utf8.encode(credentials));
 
     var client = AltHttpClient();
 
     var req = await client.postUrl(Uri.https(_hostURL, _getDisbursementTokenURL)).then((HttpClientRequest request) {
-      request.headers.add('Authorization', 'Basic ' + base64.encode(utf8.encode(credentials)));
+      request.headers.add('Authorization', 'Basic $basicCred');
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
       request.headers.contentType = ContentType.json;
       return request.close();
@@ -107,7 +103,7 @@ class MTNMobileMoney {
     var client = AltHttpClient();
 
     var req = await client.getUrl(Uri.https(_hostURL, _getAccountBalanceURL)).then((HttpClientRequest request) {
-      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+      request.headers.add('Authorization', 'Bearer $_accessToken');
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('X-Target-Environment', 'sandbox');
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
@@ -153,18 +149,10 @@ class MTNMobileMoney {
 
     print(body);
 
-    var headers = {
-      'Authorization': 'Bearer ' + _accessToken,
-      'X-Reference-Id': _referenceID,
-      'X-Target-Environment': 'sandbox',
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': _disbursementKey
-    };
-
     var client = AltHttpClient();
 
     var req = await client.postUrl(Uri.https(_hostURL, _transferMoneyURL)).then((HttpClientRequest request) {
-      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+      request.headers.add('Authorization', 'Bearer $_accessToken');
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('X-Target-Environment', 'sandbox');
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
@@ -181,25 +169,14 @@ class MTNMobileMoney {
       });
     });
 
-    checkTransactionStatus();
-
   }
 
-  static Future<http.Response> checkTransactionStatus() async {
-
-    var headers = {
-      'Authorization': 'Bearer ' + _accessToken,
-      'X-Reference-Id': _referenceID,
-      'X-Target-Environment': 'sandbox',
-      'Content-Type': 'application/json',
-      'Ocp-Apim-Subscription-Key': _disbursementKey
-    };
-
+  static Future<HttpClientResponse> checkTransactionStatus() async {
 
     var client = AltHttpClient();
 
-    var req = await client.getUrl(Uri.https(_hostURL, _checkTransferStatusURL)).then((HttpClientRequest request) {
-      request.headers.add('Authorization', 'Bearer ' + _accessToken);
+    HttpClientResponse response = await client.getUrl(Uri.https(_hostURL, _checkTransferStatusURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Bearer $_accessToken');
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('X-Target-Environment', 'sandbox');
       request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
@@ -212,10 +189,12 @@ class MTNMobileMoney {
       response.transform(utf8.decoder).listen((contents) {
         // handle data
       });
+      return response;
     });
 
-  }
+    return response;
 
+  }
 }
 
 enum PaymentPlan {
