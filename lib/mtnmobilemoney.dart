@@ -15,6 +15,7 @@ class MTNMobileMoney {
   static String _apiKey = '';
   static String _accessToken = '';
   static String _referenceID = '';
+  static String _transactionStatus = '';
   //static final _referenceID = 'cd0f4b28-3de1-4148-bf2e-aa3543dc5be2';
   static final _hostURL = 'sandbox.momodeveloper.mtn.com';
   static final _createAPIUserURL = '/v1_0/apiuser';
@@ -232,6 +233,8 @@ class MTNMobileMoney {
       print(response.reasonPhrase);
       response.transform(utf8.decoder).listen((contents) {
         // handle data
+        //print(contents);
+        _transactionStatus = contents;
       });
       return response;
     });
@@ -239,6 +242,13 @@ class MTNMobileMoney {
     return response;
 
   }
+
+  static String getTransactionStatus() {
+    var status = _transactionStatus;
+    _transactionStatus = '';
+    return status;
+  }
+
 }
 
 enum PaymentPlan {
@@ -267,7 +277,6 @@ class MOMOTransaction {
 class AfterPayTransaction{
 
   final String _payee;
-  final String _payer;
   final double _totalAmount;
   final PaymentPlan _plan;
   double _initialPaymentAmount;
@@ -276,10 +285,13 @@ class AfterPayTransaction{
   Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._payer, this._totalAmount, this._plan, String currency, String message) {
+  AfterPayTransaction(this._payee, this._totalAmount, this._plan, String currency, String message) {
     //TODO: Initialise _completedTransactions and _remainingTransactions
     double remainder = 0.0;
     double recurringCharge = 0.0;
+    _transactions = Queue<MOMOTransaction>();
+    _completedTransactions = Queue<MOMOTransaction>();
+    _remainingTransactions = Queue<MOMOTransaction>();
 
     switch (_plan) {
       case PaymentPlan.HALF:
@@ -346,8 +358,6 @@ class AfterPayTransaction{
 
   String get payee { return this._payee; }
 
-  String get payer { return this._payer; }
-
   Queue<MOMOTransaction> get allTransactions { return this._transactions; }
 
   Queue<MOMOTransaction> get remainingTransactions { return this._remainingTransactions; }
@@ -357,5 +367,11 @@ class AfterPayTransaction{
   PaymentPlan get paymentPlan { return this._plan; }
 
   bool get isCompleted { return this._completed; }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "payee: ${this.payee}, total amount: ${this.paymentPlan}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
+  }
 
 }

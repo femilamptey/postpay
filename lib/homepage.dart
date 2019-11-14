@@ -10,18 +10,18 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 class HomePage extends StatefulWidget {
   static final String tag = 'home-page';
 
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  static final List<String> _currencies = ['EUR', 'GHS'];
+  double accountBalance = 5000.00;
+  double availableBalance = 4400.00;
+  String _currency = 'EUR';
+
   @override
   _HomePageState createState() => new _HomePageState();
 
 }
 
 class _HomePageState extends State<HomePage> {
-
-  final _scaffoldKey = GlobalKey<ScaffoldState>();
-  static final List<String> _currencies = ['EUR', 'GHS'];
-  double accountBalance = 5000.00;
-  double availableBalance = 4400.00;
-  String _currency = 'EUR';
 
   @override
   void initState() {
@@ -118,12 +118,12 @@ class _HomePageState extends State<HomePage> {
       radius: 300.0,
       lineWidth: 27.0,
       animation: true,
-      percent: (availableBalance/accountBalance).abs(),
+      percent: (widget.availableBalance/widget.accountBalance).abs(),
       center: makePaymentButton,
       footer: new Text(
-        "Account Balance: $accountBalance " + _currency + "\nAvailable Balance: $availableBalance " + _currency,
+        "Account Balance: ${widget.accountBalance} ${widget._currency} \nAvailable Balance: ${widget.availableBalance} ${widget._currency}",
         style:
-        new TextStyle(fontWeight: FontWeight.bold, fontSize: 28.0),
+        new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
       ),
       circularStrokeCap: CircularStrokeCap.square,
       progressColor: Colors.green,
@@ -170,7 +170,7 @@ class _HomePageState extends State<HomePage> {
     )
         .then<void>((T value) { // The value passed to Navigator.pop() or null.
       if (value != null) {
-        _scaffoldKey.currentState.showSnackBar(SnackBar(
+        widget._scaffoldKey.currentState.showSnackBar(SnackBar(
           content: Text('You selected: $value'),
         ));
       }
@@ -285,13 +285,13 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
       ),
       actions: <Widget>[
         FlatButton(
-          child: const Text('Cancel'),
+          child: Text('Cancel', style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.pop(context, 'cancel');
           },
         ),
         FlatButton(
-          child: const Text('Next'),
+          child: Text('Next', style: TextStyle(color: Colors.black)),
           onPressed: () {
             if (amount != null || payee != null || MOMOPin != null) {
               Navigator.pop(context, 'cancel');

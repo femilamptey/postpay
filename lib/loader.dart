@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
+
+import 'package:http/http.dart';
 
 class ColorLoader extends StatefulWidget {
   static final String tag = 'loading-page';
@@ -114,6 +117,8 @@ class _ColorLoaderState extends State<ColorLoader> with TickerProviderStateMixin
             if (snapshot.connectionState == ConnectionState.done) {
               var data = snapshot.data as HttpClientResponse;
               var status = data.statusCode;
+              //TODO: Read response from transaction status and determine if transaction failed or succeeded, and present appropriate message
+              print(MTNMobileMoney.getTransactionStatus());
               return TransactionStatusDialog(status);
             } else {
               return Stack(
@@ -269,7 +274,7 @@ class TransactionStatusDialogState extends State<TransactionStatusDialog> {
       content: Text(contentText),
       actions: <Widget>[
         FlatButton(
-          child: Text("Done"),
+          child: Text("Done", style: TextStyle(color: Colors.black)),
           onPressed: () {
             Navigator.pop(context);
           },
