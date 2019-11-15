@@ -1,14 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:afterpay/homepage.dart';
 import 'package:afterpay/database.dart';
+import 'package:localstorage/localstorage.dart';
 
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
+  LocalStorage storage = new LocalStorage("credentials");
+
   @override
   _LoginPageState createState() => new _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
+  
+  TextEditingController accountFieldController = new TextEditingController();
+  TextEditingController pinFieldController = new TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final logo = SizedBox(
@@ -26,6 +33,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      controller: accountFieldController,
     );
 
     final password = TextFormField(
@@ -37,6 +45,7 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      controller: pinFieldController,
     );
 
     final loginButton = Padding(
@@ -45,8 +54,15 @@ class _LoginPageState extends State<LoginPage> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
         ),
-        onPressed: () {
-          Navigator.of(context).pushReplacementNamed(HomePage.tag);
+        onPressed: () async {
+          await widget.storage.ready.then((isReady) async {
+            print(isReady);
+            await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
+              await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
+                Navigator.of(context).pushReplacementNamed(HomePage.tag);
+              });
+            });
+          });
         },
         padding: EdgeInsets.all(12),
         color: Colors.black,

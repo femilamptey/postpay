@@ -1,9 +1,8 @@
 import 'package:afterpay/confirmpaymentpage.dart';
-import 'package:afterpay/loginpage.dart';
-import 'package:afterpay/mtnmobilemoney.dart';
-import 'package:afterpay/pendingpayments.dart';
+import 'package:afterpay/navDrawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 
@@ -51,50 +50,13 @@ class _HomePageState extends State<HomePage> {
       iconTheme: IconThemeData(color: Colors.white, size: 26.0),
     );
 
-    final navDrawer = new Drawer(
-      child: ListView(
-        physics: NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          new UserAccountsDrawerHeader(
-              accountName: Text("Options", style: TextStyle(color: Colors.white, fontSize: 38.0)),
-              accountEmail: null,
-              decoration: BoxDecoration(color: Colors.black)),
-          new ListTile(
-            title: Text("Home", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              //DO NOTHING
-            },
-          ),
-          new ListTile(
-            title: Text("Pending Payments", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(PendingPaymentsPage.tag);
-            },
-          ),
-          new ListTile(
-            title: Text("Sign Out", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(LoginPage.tag);
-            },
-          )
-        ],
-      ),
-    );
+    final navDrawer = NavDrawer(HomePage.tag);
 
     final logo = Hero(
       tag: 'hero',
       child: Padding(
         padding: EdgeInsets.all(30.0),
           child: Image.asset('assets/heading.jpeg')
-      ),
-    );
-
-    final welcome = Padding(
-      padding: EdgeInsets.all(8.0),
-      child: Text(
-        'Welcome Alucard',
-        style: TextStyle(fontSize: 28.0, color: Colors.black),
       ),
     );
 
@@ -179,7 +141,9 @@ class _HomePageState extends State<HomePage> {
 }
 
 class InitiateTransferDialog extends StatefulWidget {
-  const InitiateTransferDialog({this.onValueChange, this.initialValue});
+  InitiateTransferDialog({this.onValueChange, this.initialValue});
+  LocalStorage storage = new LocalStorage("credentials");
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   final String initialValue;
   final void Function(String) onValueChange;
@@ -194,6 +158,9 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
 
   @override
   void initState() {
+    widget.storage.ready.then((isReady) {
+      print(isReady);
+    });
     super.initState();
   }
 
@@ -208,7 +175,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
     String payee;
     double amount;
     String message = '';
-    int MOMOPin;
+    String MOMOPin;
 
     final payeeFieldController = TextEditingController();
     final amountFieldController = TextEditingController();
@@ -267,7 +234,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
                 labelText: "MOMO PIN"
             ),
             onChanged: (text) {
-              MOMOPin = int.parse(text);
+              MOMOPin = text;
             },
             controller: MOMOPinFieldController,
           )),
@@ -294,21 +261,88 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
           child: Text('Next', style: TextStyle(color: Colors.black)),
           onPressed: () {
             if (amount != null || payee != null || MOMOPin != null) {
-              Navigator.pop(context, 'cancel');
-              Navigator.push(context,
-                  MaterialPageRoute(
-                    builder: (context) =>
-                        ConfirmPaymentPage(
-                            payee, amount, _currency, message, MOMOPin),
-                  ));
+              if (widget.storage.getItem("pin") == MOMOPin) {
+                Navigator.pop(context, 'cancel');
+                Navigator.push(context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          ConfirmPaymentPage(
+                              payee, amount, _currency, message, MOMOPin),
+                    ));
+              } else {
+                print(MOMOPin);
+                showMaterialDialog<String>(
+                  context: context,
+                  child: AlertDialog(
+                    title: const Text('Incorrect PIN'),
+                    content: Text(
+                      'Enter the MOMO PIN for this account',
+                      style: Theme
+                          .of(context)
+                          .textTheme
+                          .subhead
+                          .copyWith(color: Theme
+                          .of(context)
+                          .textTheme
+                          .caption
+                          .color),
+                    ),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: const Text('OK', style: TextStyle(color: Colors.black)),
+                        onPressed: () {
+                          Navigator.pop(context, 'discard');
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              }
             } else {
-              Scaffold.of(context).showSnackBar(SnackBar(
-                content: Text("Please fill required fields."),
-              ));
+              showMaterialDialog<String>(
+                context: context,
+                child: AlertDialog(
+                  title: const Text('Empty fields'),
+                  content: Text(
+                    'Fill in all non-optional fields',
+                    style: Theme
+                        .of(context)
+                        .textTheme
+                        .subhead
+                        .copyWith(color: Theme
+                        .of(context)
+                        .textTheme
+                        .caption
+                        .color),
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                      child: const Text('OK', style: TextStyle(color: Colors.black)),
+                      onPressed: () {
+                        Navigator.pop(context, 'discard');
+                      },
+                    ),
+                  ],
+                ),
+              );
             }
           },
         ),
       ],
     );
+  }
+
+  void showMaterialDialog<T>({ BuildContext context, Widget child }) {
+    showDialog<T>(
+      context: context,
+      builder: (BuildContext context) => child,
+    )
+        .then<void>((T value) { // The value passed to Navigator.pop() or null.
+      if (value != null) {
+        widget._scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text('You selected: $value'),
+        ));
+      }
+    });
   }
 }

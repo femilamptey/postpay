@@ -10,7 +10,7 @@ class ConfirmPaymentPage extends StatefulWidget {
   final double _amount;
   final String _currency;
   final String _message;
-  final int _MOMOPin;
+  final String _MOMOPin;
 
   @override
   State createState() => new ConfirmPaymentPageState();
@@ -53,7 +53,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
         Container(
           padding: const EdgeInsets.all(8),
           child: MaterialButton(
-            child: Text('50%\n\nPay $half ${widget._currency}vnow\n\nPay $halfWeekly weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+            child: Text('50%\n\nPay $half ${widget._currency} now\n\nPay $halfWeekly weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
               showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.HALF, widget._amount, double.parse(half), double.parse(halfWeekly), widget._currency, widget._payee, context));

@@ -1,3 +1,4 @@
+import 'package:afterpay/navDrawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
@@ -26,36 +27,7 @@ class PendingPaymentsPage extends StatelessWidget {
       iconTheme: IconThemeData(color: Colors.white, size: 26.0),
     );
 
-    final navDrawer = new Drawer(
-      child: ListView(
-        physics: NeverScrollableScrollPhysics(),
-        padding: EdgeInsets.zero,
-        children: <Widget>[
-          new UserAccountsDrawerHeader(
-              accountName: Text("Options", style: TextStyle(color: Colors.white, fontSize: 38.0)),
-              accountEmail: null,
-              decoration: BoxDecoration(color: Colors.black)),
-          new ListTile(
-            title: Text("Home", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(HomePage.tag);
-            },
-          ),
-          new ListTile(
-            title: Text("Pending Payments", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(PendingPaymentsPage.tag);
-            },
-          ),
-          new ListTile(
-            title: Text("Sign Out", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              Navigator.of(context).pushReplacementNamed(LoginPage.tag);
-            },
-          )
-        ],
-      ),
-    );
+    final navDrawer = NavDrawer(PendingPaymentsPage.tag);
 
     final list = new ListView(
       physics: ScrollPhysics(),
