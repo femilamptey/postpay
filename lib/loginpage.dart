@@ -6,13 +6,16 @@ import 'package:localstorage/localstorage.dart';
 class LoginPage extends StatefulWidget {
   static String tag = 'login-page';
   LocalStorage storage = new LocalStorage("credentials");
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   _LoginPageState createState() => new _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
-  
+
+  bool bothFieldsFilled = false;
+
   TextEditingController accountFieldController = new TextEditingController();
   TextEditingController pinFieldController = new TextEditingController();
 
@@ -25,7 +28,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
     );
 
-    final email = TextFormField(
+    final account = TextFormField(
       keyboardType: TextInputType.number,
       autofocus: false,
       decoration: InputDecoration(
@@ -33,6 +36,17 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      onChanged: (text) {
+        if (accountFieldController.text == '') {
+          setState(() {
+            bothFieldsFilled = false;
+          });
+        } else if (pinFieldController.text != '' && accountFieldController.text != '') {
+          setState(() {
+            bothFieldsFilled = true;
+          });
+        }
+      },
       controller: accountFieldController,
     );
 
@@ -45,8 +59,21 @@ class _LoginPageState extends State<LoginPage> {
         contentPadding: EdgeInsets.fromLTRB(20.0, 10.0, 20.0, 10.0),
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(32.0)),
       ),
+      onChanged: (text) {
+        if (pinFieldController.text == '') {
+          setState(() {
+            bothFieldsFilled = false;
+          });
+        } else if (pinFieldController.text != '' && accountFieldController.text != '') {
+          setState(() {
+            bothFieldsFilled = true;
+          });
+        }
+      },
       controller: pinFieldController,
     );
+
+    //final errorMessageSnackbar = SnackBar(content: Text("Fill in both fields"));
 
     final loginButton = Padding(
       padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -55,17 +82,24 @@ class _LoginPageState extends State<LoginPage> {
           borderRadius: BorderRadius.circular(24),
         ),
         onPressed: () async {
-          await widget.storage.ready.then((isReady) async {
-            print(isReady);
-            await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
-              await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
-                Navigator.of(context).pushReplacementNamed(HomePage.tag);
+          if (bothFieldsFilled) {
+            if (accountFieldController.text == '' || pinFieldController.text == '') {
+              //Scaffold.of(context).showSnackBar(errorMessageSnackbar);
+            } else {
+              await widget.storage.ready.then((isReady) async {
+                await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
+                  await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
+                    Navigator.of(context).pushReplacementNamed(HomePage.tag);
+                  });
+                });
               });
-            });
-          });
+            }
+          } else {
+            //DO NOTHING
+          }
         },
         padding: EdgeInsets.all(12),
-        color: Colors.black,
+        color: bothFieldsFilled ? Colors.black: Colors.grey,
         child: Text('Log In', style: TextStyle(color: Colors.white)),
       ),
     );
@@ -80,7 +114,7 @@ class _LoginPageState extends State<LoginPage> {
           children: <Widget>[
             logo,
             SizedBox(height: 48.0),
-            email,
+            account,
             SizedBox(height: 8.0),
             password,
             SizedBox(height: 24.0),

@@ -1,4 +1,5 @@
 import 'package:afterpay/loader.dart';
+import 'package:afterpay/loaderpage.dart';
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -125,7 +126,7 @@ class ConfirmationDialog extends StatefulWidget {
 
 class ConfirmationDialogState extends State<ConfirmationDialog> {
 
-  bool _isButtonDisabled = false;
+  bool _isLoading = false;
   Color _isClickedColor = Colors.black;
 
   ConfirmationDialogState();
@@ -154,55 +155,63 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
           break;
       }
     }
+    
+    List<Widget> getWidget() {
+      if (_isLoading) {
+        return [ColorLoader(), Text("Initiating payment...")];
+      } else {
+        return [
+          getPlan(),
+          Text("Paid to: ${widget.payee}"),
+          Text("Upfront Payment: ${widget.upFrontPaymentAmount} ${widget.currency}"),
+          Text("Recurring charge: ${widget.planPaymentAmount} ${widget.currency}")
+        ];
+      }
+    }
 
-      return new AlertDialog(
-        content: new Column(
-          children: <Widget>[
-            getPlan(),
-            Text("Paid to: ${widget.payee}"),
-            Text("Upfront Payment: ${widget.upFrontPaymentAmount} ${widget.currency}"),
-            Text("Recurring charge: ${widget.planPaymentAmount} ${widget.currency}")
-          ],
-          mainAxisSize: MainAxisSize.min,
+    return new AlertDialog(
+      content: new Column(
+        children: getWidget(),
+        mainAxisSize: MainAxisSize.min,
+      ),
+      actions: _isLoading ? null: <Widget>[
+        FlatButton(
+          child: Text('Cancel', style: TextStyle(color: _isClickedColor)),
+          onPressed: () {
+            if (!_isLoading) {
+              Navigator.pop(context);
+            }
+          },
         ),
-        actions: <Widget>[
-          FlatButton(
-            child: Text('Cancel', style: TextStyle(color: _isClickedColor)),
-            onPressed: () {
-              if (!_isButtonDisabled) {
-                Navigator.pop(context);
-              }
-            },
-          ),
-          FlatButton(
-            child: Text('Pay', style: TextStyle(color: _isClickedColor)),
-            onPressed: () async {
-              if (!_isButtonDisabled) {
-                setState(() {
-                  _isButtonDisabled = true;
-                  _isClickedColor = Colors.grey;
-                });
-                print(AfterPayTransaction(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message).toString());
-                MTNMobileMoney.createAPIUser().then((response) {
-                  MTNMobileMoney.getAPIKey().then((response) {
-                    MTNMobileMoney.getDisbursementToken().then((response) {
-                      MTNMobileMoney.transferMoney(
-                          widget.upFrontPaymentAmount, widget.currency,
-                          widget.payee, widget.message).then((response) {
-                        Navigator.pop(context, 'cancel');
-                        Navigator.pushReplacementNamed(context, ColorLoader.tag);
-                      });
+        FlatButton(
+          child: Text('Pay', style: TextStyle(color: _isClickedColor)),
+          onPressed: () async {
+            if (!_isLoading) {
+              setState(() {
+                _isLoading = true;
+                _isClickedColor = Colors.grey;
+              });
+              print(AfterPayTransaction(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message).toString());
+              MTNMobileMoney.createAPIUser().then((response) {
+                MTNMobileMoney.getAPIKey().then((response) {
+                  MTNMobileMoney.getDisbursementToken().then((response) {
+                    MTNMobileMoney.transferMoney(
+                        widget.upFrontPaymentAmount, widget.currency,
+                        widget.payee, widget.message).then((response) {
+                      Navigator.pop(context, 'cancel');
+                      Navigator.pushReplacementNamed(context, ColorLoaderPage.tag);
                     });
                   });
                 });
-              } else {
+              });
+            } else {
 
-              }
-            },
-          ),
-        ],
-      );
-    }
+            }
+          },
+        ),
+      ],
+    );
+  }
 }
 
 
