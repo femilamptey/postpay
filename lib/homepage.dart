@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    
+
     widget.accountBalance = widget.storage.getItem("accountBalance");
     widget.availableBalance = widget.storage.getItem("availableBalance");
 
