@@ -4,6 +4,7 @@ import 'dart:core';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:alt_http/alt_http.dart';
 import 'package:uuid/uuid.dart';
@@ -262,6 +263,10 @@ enum PaymentPlan {
 
 class MOMOTransaction {
 
+  /*
+  Might need to implement this later.
+  final String financialTransactionID
+  */
   final double _amount;
   final String _currency;
   final String _message;
@@ -281,6 +286,9 @@ class MOMOTransaction {
       "message": getMessage
     };
   }
+
+  factory MOMOTransaction.fromJSON(Map<String, dynamic> json) =>
+      MOMOTransaction(json["amount"], json["currency"], json["message"]);
 
 }
 
@@ -391,7 +399,7 @@ class AfterPayTransaction{
 
   Map<String, dynamic> toJSON() => {
     'payee': _payee,
-    'finalTransactionID': _financialTransactionID,
+    'financialTransactionID': _financialTransactionID,
     'totalAmount': _totalAmount,
     'plan': _plan.toString(),
     'initialPayment' : _initialPaymentAmount,
@@ -403,6 +411,10 @@ class AfterPayTransaction{
 
   Map<String, dynamic> toMap() {
     return { "afterpayID": _financialTransactionID, "afterPayJSON": this.toJSON() };
+  }
+
+  static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
+    return dbRecord["afterPayJSON"];
   }
 
   @override

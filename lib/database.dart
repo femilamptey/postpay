@@ -52,6 +52,14 @@ class DBProvider {
     });
   }
 
+  static deleteTransactionTable() async {
+    await DBProvider.database.then((database) async {
+      await database.delete("Transactions").then((number) {
+        print(number);
+      });
+    });
+  }
+
 }
 
 enum DBStatus {

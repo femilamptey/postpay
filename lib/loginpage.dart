@@ -19,6 +19,21 @@ class _LoginPageState extends State<LoginPage> {
   TextEditingController accountFieldController = new TextEditingController();
   TextEditingController pinFieldController = new TextEditingController();
 
+  login() async {
+    await widget.storage.ready.then((isReady) async {
+      await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
+        await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
+          await widget.storage.setItem("accountBalance", 5000.00).then((onValue) async {
+            await widget.storage.setItem("availableBalance", 4400.00).then((onValue) async {
+              await widget.storage.setItem("currency", "EUR").then((onValue) async {
+              });
+            });
+          });
+        });
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final logo = SizedBox(
@@ -86,13 +101,8 @@ class _LoginPageState extends State<LoginPage> {
             if (accountFieldController.text == '' || pinFieldController.text == '') {
               //Scaffold.of(context).showSnackBar(errorMessageSnackbar);
             } else {
-              await widget.storage.ready.then((isReady) async {
-                await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
-                  await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
-                    Navigator.of(context).pushReplacementNamed(HomePage.tag);
-                  });
-                });
-              });
+              login();
+              Navigator.of(context).pushReplacementNamed(HomePage.tag);
             }
           } else {
             //DO NOTHING

@@ -1,4 +1,5 @@
 import 'package:afterpay/confirmpaymentpage.dart';
+import 'package:afterpay/database.dart';
 import 'package:afterpay/navDrawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -9,11 +10,18 @@ import 'package:percent_indicator/circular_percent_indicator.dart';
 class HomePage extends StatefulWidget {
   static final String tag = 'home-page';
 
+  LocalStorage storage = new LocalStorage("credentials");
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   static final List<String> _currencies = ['EUR', 'GHS'];
-  double accountBalance = 5000.00;
-  double availableBalance = 4400.00;
-  String _currency = 'EUR';
+  double accountBalance;
+  double availableBalance;
+  String _currency;
+
+  HomePage() {
+    accountBalance =  storage.getItem("accountBalance");
+    availableBalance = storage.getItem("availableBalance");
+    _currency = storage.getItem("currency");
+  }
 
   @override
   _HomePageState createState() => new _HomePageState();
@@ -83,7 +91,7 @@ class _HomePageState extends State<HomePage> {
       percent: (widget.availableBalance/widget.accountBalance).abs(),
       center: makePaymentButton,
       footer: new Text(
-        "Account Balance: ${widget.accountBalance} ${widget._currency} \nAvailable Balance: ${widget.availableBalance} ${widget._currency}",
+        "Account Balance: ${widget.accountBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
         style:
         new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
       ),
@@ -98,9 +106,9 @@ class _HomePageState extends State<HomePage> {
       onRefresh: () async {
         //TODO
         await Future.delayed(Duration(seconds: 5), () {
-          setState(() {
+          setState(() async {
             //TODO: Refresh
-
+            
           });
         });
         _refreshController.refreshCompleted();

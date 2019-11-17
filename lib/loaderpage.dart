@@ -40,11 +40,11 @@ class _ColorLoaderPageState extends State<ColorLoaderPage> {
               //TODO: Read response from transaction status and determine if transaction failed or succeeded, and present appropriate message
               var id = jsonDecode(MTNMobileMoney.getTransactionStatus())["financialTransactionId"];
               var transaction = AfterPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message);
-              var json = transaction.toJSON();
-              //print(json);
+              print(transaction.toJSON());
               print(transaction.toMap());
               //DBProvider.storeAfterpayTransaction(transaction);
-              DBProvider.getAllTransactions();
+              //DBProvider.getAllTransactions();
+              //DBProvider.deleteTransactionTable();
               print(MTNMobileMoney.getTransactionStatus());
               return TransactionStatusDialog(status);
             } else {
