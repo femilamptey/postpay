@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:sqflite/sqlite_api.dart';
+
+import 'mtnmobilemoney.dart';
 
 class DBProvider {
   DBProvider._();
@@ -10,7 +13,7 @@ class DBProvider {
 
   static Database _database;
 
-  Future<Database> get database async {
+  static Future<Database> get database async {
     if (_database != null)
       return _database;
 
@@ -19,20 +22,40 @@ class DBProvider {
     return _database;
   }
 
-  initDB() async {
+  static initDB() async {
     Directory documentsDirectory = await getApplicationDocumentsDirectory();
-    String path = join(documentsDirectory.path, "Account.db");
+    String path = join(documentsDirectory.path, "payments.db");
     return await openDatabase(path, version: 1, onOpen: (db) {
     }, onCreate: (Database db, int version) async {
-      await db.execute("CREATE TABLE Accounts ("
-          "accountNo INTEGER PRIMARY KEY,"
-          "PIN Integer,"
-          "accountBalance REAL,"
-          "availableBalance REAL,"
-          "apiKey TEXT"
+      await db.execute("CREATE TABLE Transactions ("
+          "afterpayID PRIMARY KEY,"
+          "afterPayJSON BLOB"
           ")");
     });
   }
 
+  static Future<DBStatus> storeAfterpayTransaction(AfterPayTransaction transaction) async {
+    // ignore: missing_return
+    await DBProvider.database.then((database) {
+      database.insert("Transactions", transaction.toMap()).then((res) async {
+        print(res);
+      });
+    });
+  }
+
+  static Future<List<Map<String, dynamic>>> getAllTransactions() async {
+    await DBProvider.database.then((database) async {
+      await database.query("Transactions", columns: ["afterpayID", "afterPayJSON"]).then((results) {
+        print(results);
+        return results;
+      });
+    });
+  }
+
+}
+
+enum DBStatus {
+  SUCCESS,
+  FAILURE
 }
 

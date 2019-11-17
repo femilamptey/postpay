@@ -1,11 +1,21 @@
+import 'dart:convert';
 import 'dart:io';
 
+import 'package:afterpay/database.dart';
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/material.dart';
 import 'loader.dart';
 
 class ColorLoaderPage extends StatefulWidget {
   static final String tag = 'loader-page';
+  
+  final String _payee;
+  final double _totalAmount;
+  final PaymentPlan _plan;
+  final String _currency;
+  final  String _message;
+
+  ColorLoaderPage(this._payee, this._totalAmount, this._plan, this._currency, this._message);
 
   @override
   State<StatefulWidget> createState() => _ColorLoaderPageState();
@@ -28,6 +38,13 @@ class _ColorLoaderPageState extends State<ColorLoaderPage> {
               var data = snapshot.data as HttpClientResponse;
               var status = data.statusCode;
               //TODO: Read response from transaction status and determine if transaction failed or succeeded, and present appropriate message
+              var id = jsonDecode(MTNMobileMoney.getTransactionStatus())["financialTransactionId"];
+              var transaction = AfterPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message);
+              var json = transaction.toJSON();
+              //print(json);
+              print(transaction.toMap());
+              //DBProvider.storeAfterpayTransaction(transaction);
+              DBProvider.getAllTransactions();
               print(MTNMobileMoney.getTransactionStatus());
               return TransactionStatusDialog(status);
             } else {

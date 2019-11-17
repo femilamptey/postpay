@@ -57,7 +57,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
             child: Text('50%\n\nPay $half ${widget._currency} now\n\nPay $halfWeekly weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
-              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.HALF, widget._amount, double.parse(half), double.parse(halfWeekly), widget._currency, widget._payee, context));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.HALF, widget._amount, double.parse(half), double.parse(halfWeekly), widget._currency, widget._payee, context, message: widget._message,));
             },
             color: Colors.lightBlue,
           )
@@ -68,7 +68,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
             child: Text('25%\n\nPay $quarter ${widget._currency} now\n\nPay $quarterWeekly weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
-              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.QUARTER, widget._amount, double.parse(quarter), double.parse(quarterWeekly), widget._currency, widget._payee, context));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.QUARTER, widget._amount, double.parse(quarter), double.parse(quarterWeekly), widget._currency, widget._payee, context, message: widget._message,));
             },
             color: Colors.green,
           )
@@ -79,7 +79,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               child: Text('10%\n\nPay $ten ${widget._currency} now\n\nPay $tenWeekly weekly over 2 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.TEN, widget._amount, double.parse(ten), double.parse(tenWeekly), widget._currency, widget._payee, context));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.TEN, widget._amount, double.parse(ten), double.parse(tenWeekly), widget._currency, widget._payee, context, message: widget._message,));
               },
               color: Colors.yellow,
             )        ),
@@ -89,7 +89,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
               child: Text('5%\n\nPay $five ${widget._currency} now\n\n Pay $fiveDaily daily over one week', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.FIVE, widget._amount, double.parse(five), double.parse(fiveDaily), widget._currency, widget._payee, context));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.FIVE, widget._amount, double.parse(five), double.parse(fiveDaily), widget._currency, widget._payee, context, message: widget._message,));
               },
               color: Colors.red,
             )        ),
@@ -138,6 +138,8 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
 
   Widget build(BuildContext context) {
 
+    print(widget.message);
+
     // ignore: missing_return
     Text getPlan() {
       switch (widget.selectedPlan) {
@@ -158,7 +160,7 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
     
     List<Widget> getWidget() {
       if (_isLoading) {
-        return [ColorLoader(), Text("Initiating payment...")];
+        return [ColorLoader(), Text("\nInitiating payment...")];
       } else {
         return [
           getPlan(),
@@ -191,7 +193,6 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
                 _isLoading = true;
                 _isClickedColor = Colors.grey;
               });
-              print(AfterPayTransaction(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message).toString());
               MTNMobileMoney.createAPIUser().then((response) {
                 MTNMobileMoney.getAPIKey().then((response) {
                   MTNMobileMoney.getDisbursementToken().then((response) {
@@ -199,7 +200,9 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
                         widget.upFrontPaymentAmount, widget.currency,
                         widget.payee, widget.message).then((response) {
                       Navigator.pop(context, 'cancel');
-                      Navigator.pushReplacementNamed(context, ColorLoaderPage.tag);
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
+                        return ColorLoaderPage(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message);
+                      }));
                     });
                   });
                 });

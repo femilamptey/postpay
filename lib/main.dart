@@ -16,7 +16,6 @@ class MyApp extends StatelessWidget {
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),
     PendingPaymentsPage.tag: (context) => PendingPaymentsPage(),
-    ColorLoaderPage.tag: (context) => ColorLoaderPage(),
   };
 
   @override

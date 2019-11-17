@@ -8,6 +8,8 @@ import 'package:http/http.dart' as http;
 import 'package:alt_http/alt_http.dart';
 import 'package:uuid/uuid.dart';
 
+import 'database.dart';
+
 class MTNMobileMoney {
 
   MTNMobileMoney._();
@@ -272,11 +274,20 @@ class MOMOTransaction {
 
   String get getMessage { return this._message; }
 
+  Map<String, dynamic> jsonEncode() {
+    return {
+      "amount": getAmount,
+      "currency": getCurrency,
+      "message": getMessage
+    };
+  }
+
 }
 
 class AfterPayTransaction{
 
   final String _payee;
+  final String _financialTransactionID;
   final double _totalAmount;
   final PaymentPlan _plan;
   double _initialPaymentAmount;
@@ -285,8 +296,7 @@ class AfterPayTransaction{
   Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._totalAmount, this._plan, String currency, String message) {
-    //TODO: Initialise _completedTransactions and _remainingTransactions
+  AfterPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message) {
     double remainder = 0.0;
     double recurringCharge = 0.0;
     _transactions = Queue<MOMOTransaction>();
@@ -368,10 +378,37 @@ class AfterPayTransaction{
 
   bool get isCompleted { return this._completed; }
 
+  factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) =>
+      new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], json["plan"], json["currency"], json["message"]);
+
+  List<Map<String, dynamic>> convertTransactionQueueToJSON(transactionQueue) {
+    List<Map<String, dynamic>> list = new List<Map<String, dynamic>>();
+    transactionQueue.forEach((transaction) {
+      list.add(transaction.jsonEncode());
+    });
+    return list;
+  }
+
+  Map<String, dynamic> toJSON() => {
+    'payee': _payee,
+    'finalTransactionID': _financialTransactionID,
+    'totalAmount': _totalAmount,
+    'plan': _plan.toString(),
+    'initialPayment' : _initialPaymentAmount,
+    'transactions' : this.convertTransactionQueueToJSON(_transactions),
+    'completedTransactions' : this.convertTransactionQueueToJSON(_completedTransactions),
+    'remainingTransactions' : this.convertTransactionQueueToJSON(_remainingTransactions),
+    'completed' : _completed
+  };
+
+  Map<String, dynamic> toMap() {
+    return { "afterpayID": _financialTransactionID, "afterPayJSON": this.toJSON() };
+  }
+
   @override
   String toString() {
     // TODO: implement toString
-    return "payee: ${this.payee}, total amount: ${this.paymentPlan}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
+    return "payee: ${this.payee}, financial transaction id: ${this._financialTransactionID}, total amount: ${this._totalAmount}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
   }
 
 }
