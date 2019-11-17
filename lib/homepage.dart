@@ -187,72 +187,77 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
     final MOMOPinFieldController = TextEditingController();
 
     return new AlertDialog(
-      content: new Column(
-        children: <Widget>[
-          new Container(child: new TextField(
-            keyboardType: TextInputType.number,
-            decoration: new InputDecoration(
-                labelText: "Recipient's number"
-            ),
-            onChanged: (text) {
-              payee = text;
-            },
-            controller: payeeFieldController,
-          ),
-          ),
-          new Container(child: new TextField(
-            keyboardType: TextInputType.number,
-            decoration: new InputDecoration(
-                labelText: "Transfer amount"
-            ),
-            onChanged: (text) {
-              amount = double.parse(text);
-            },
-            controller: amountFieldController,
-          )),
-          new Container(child:
-          InputDecorator(
-            decoration: const InputDecoration(
-              labelText: 'Currency',
-              contentPadding: EdgeInsets.zero,
-            ),
-            isEmpty: _currency == null,
-            child: DropdownButton<String>(
-              value: _currency,
-              onChanged: (String newValue) {
-                _onDropDownChanged(newValue);
+      content: Container(
+        height: 300.00,
+        width:  200.00,
+        child: ListView(
+          children: <Widget>[
+            new Container(child: new TextField(
+              keyboardType: TextInputType.number,
+              decoration: new InputDecoration(
+                  labelText: "Recipient's number"
+              ),
+              onChanged: (text) {
+                payee = text;
               },
-              items: _currencies.map<DropdownMenuItem<String>>((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
+              controller: payeeFieldController,
             ),
-          )
-          ),
-          new Container(child: new TextField(
-            keyboardType: TextInputType.number,
-            obscureText: true,
-            decoration: new InputDecoration(
-                labelText: "MOMO PIN"
             ),
-            onChanged: (text) {
-              MOMOPin = text;
-            },
-            controller: MOMOPinFieldController,
-          )),
-          new Container(child: new TextField(
-            decoration: new InputDecoration(
-              labelText: "Reason/Message (Optional)",
+            new Container(child: new TextField(
+              keyboardType: TextInputType.number,
+              decoration: new InputDecoration(
+                  labelText: "Transfer amount"
+              ),
+              onChanged: (text) {
+                amount = double.parse(text);
+              },
+              controller: amountFieldController,
+            )),
+            new Container(child:
+            InputDecorator(
+              decoration: const InputDecoration(
+                labelText: 'Currency',
+                contentPadding: EdgeInsets.zero,
+              ),
+              isEmpty: _currency == null,
+              child: DropdownButton<String>(
+                value: _currency,
+                onChanged: (String newValue) {
+                  _onDropDownChanged(newValue);
+                },
+                items: _currencies.map<DropdownMenuItem<String>>((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+              ),
+            )
             ),
-            onChanged: (text) {
-              message = text;
-            },
-            controller: messageFieldController,
-          ))
-        ],
-        mainAxisSize: MainAxisSize.min,
+            new Container(child: new TextField(
+              keyboardType: TextInputType.number,
+              obscureText: true,
+              decoration: new InputDecoration(
+                  labelText: "MOMO PIN"
+              ),
+              onChanged: (text) {
+                MOMOPin = text;
+              },
+              controller: MOMOPinFieldController,
+            )),
+            new Container(child: new TextField(
+              decoration: new InputDecoration(
+                labelText: "Reason/Message (Optional)",
+              ),
+              onChanged: (text) {
+                message = text;
+              },
+              controller: messageFieldController,
+            ))
+          ],
+          //mainAxisSize: MainAxisSize.min,
+          padding: EdgeInsets.all(0.0),
+        ),
       ),
       actions: <Widget>[
         FlatButton(
