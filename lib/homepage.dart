@@ -38,17 +38,9 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-
-    /*TODO: Handle Negative and 0 values
-    MTNMobileMoney.getAccountBalance().then((array) {
-      accountBalance = array[0];
-      accountBalance = accountBalance + 100.0;
-      availableBalance = accountBalance - 25;
-      print(availableBalance/accountBalance);
-      _currency = array[1];
-    });*/
-
-    //MTNMobileMoney.transferMoney();
+    
+    widget.accountBalance = widget.storage.getItem("accountBalance");
+    widget.availableBalance = widget.storage.getItem("availableBalance");
 
     final RefreshController _refreshController = RefreshController();
 
@@ -106,9 +98,9 @@ class _HomePageState extends State<HomePage> {
       onRefresh: () async {
         //TODO
         await Future.delayed(Duration(seconds: 2), () async{
-          await widget.storage.setItem("accountBalance", widget.accountBalance - 30.00).then((onValue) async {
-            await widget.storage.setItem("availableBalance", widget.availableBalance - 50.00);
-          });
+          //await widget.storage.setItem("accountBalance", widget.accountBalance).then((onValue) async {
+            //await widget.storage.setItem("availableBalance", widget.availableBalance);
+         // });
           setState(() {
             //TODO: Refresh
             widget.accountBalance = widget.storage.getItem("accountBalance");
