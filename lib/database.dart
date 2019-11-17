@@ -29,13 +29,13 @@ class DBProvider {
     }, onCreate: (Database db, int version) async {
       await db.execute("CREATE TABLE Transactions ("
           "afterpayID PRIMARY KEY,"
-          "afterPayJSON BLOB"
+          "afterpayJSON BLOB"
           ")");
     });
   }
 
+  // ignore: missing_return
   static Future<DBStatus> storeAfterpayTransaction(AfterPayTransaction transaction) async {
-    // ignore: missing_return
     await DBProvider.database.then((database) {
       database.insert("Transactions", transaction.toMap()).then((res) async {
         print(res);
@@ -43,6 +43,7 @@ class DBProvider {
     });
   }
 
+  // ignore: missing_return
   static Future<List<Map<String, dynamic>>> getAllTransactions() async {
     await DBProvider.database.then((database) async {
       await database.query("Transactions", columns: ["afterpayID", "afterPayJSON"]).then((results) {

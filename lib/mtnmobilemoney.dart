@@ -410,11 +410,11 @@ class AfterPayTransaction{
   };
 
   Map<String, dynamic> toMap() {
-    return { "afterpayID": _financialTransactionID, "afterPayJSON": this.toJSON() };
+    return { "afterpayID": _financialTransactionID, "afterpayJSON": this.toJSON() };
   }
 
   static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
-    return dbRecord["afterPayJSON"];
+    return dbRecord["afterpayJSON"];
   }
 
   @override

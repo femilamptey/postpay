@@ -48,11 +48,11 @@ class NavDrawer extends StatelessWidget {
           ),
           new ListTile(
             title: Text("Sign Out", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
+            onTap: () async {
               if (currentPage == LoginPage.tag) {
                 //DO NOTHING
               } else {
-                storage.clear().then((onValue) {
+                await storage.clear().then((onValue) {
                   Navigator.of(context).pushReplacementNamed(LoginPage.tag);
                 });
               }

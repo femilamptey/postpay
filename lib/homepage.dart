@@ -105,10 +105,14 @@ class _HomePageState extends State<HomePage> {
       enablePullDown: true,
       onRefresh: () async {
         //TODO
-        await Future.delayed(Duration(seconds: 5), () {
-          setState(() async {
+        await Future.delayed(Duration(seconds: 2), () async{
+          await widget.storage.setItem("accountBalance", widget.accountBalance - 30.00).then((onValue) async {
+            await widget.storage.setItem("availableBalance", widget.availableBalance - 50.00);
+          });
+          setState(() {
             //TODO: Refresh
-            
+            widget.accountBalance = widget.storage.getItem("accountBalance");
+            widget.availableBalance = widget.storage.getItem("availableBalance");
           });
         });
         _refreshController.refreshCompleted();
