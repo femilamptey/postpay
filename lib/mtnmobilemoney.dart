@@ -4,9 +4,11 @@ import 'dart:core';
 import 'dart:ffi';
 import 'dart:io';
 
+import 'package:afterpay/account.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:alt_http/alt_http.dart';
+import 'package:localstorage/localstorage.dart';
 import 'package:uuid/uuid.dart';
 
 import 'database.dart';
@@ -357,6 +359,19 @@ class AfterPayTransaction{
         }
     }
     _completed = false;
+
+    _deduct(initialPayment, _totalAmount);
+
+  }
+
+  _deduct(double initialPayment, double totalAmount) async {
+    LocalStorage storage = new LocalStorage("credentials");
+
+    var currentAccBal = storage.getItem("accountBalance");
+    var currentAvailBal =  storage.getItem("availableBalance");
+
+    await storage.setItem("accountBalance", currentAccBal - initialPayment);
+    await storage.setItem("availableBalance", currentAvailBal - _totalAmount);
   }
 
   completeNextTransaction() {
