@@ -45,12 +45,13 @@ class DBProvider {
 
   // ignore: missing_return
   static Future<List<Map<String, dynamic>>> getAllTransactions() async {
+    var res = List<Map<String, dynamic>>();
     await DBProvider.database.then((database) async {
-      await database.query("Transactions", columns: ["afterpayID", "afterPayJSON"]).then((results) {
-        print(results);
+      res = await database.query("Transactions", columns: ["afterPayJSON"]).then((results) {
         return results;
       });
     });
+    return res;
   }
 
   static deleteTransactionTable() async {

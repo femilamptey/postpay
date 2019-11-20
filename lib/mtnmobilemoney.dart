@@ -405,8 +405,19 @@ class AfterPayTransaction{
     var transactions = Queue<MOMOTransaction>();
     var completedTransactions = Queue<MOMOTransaction>();
     var remainingTransactions = Queue<MOMOTransaction>();
+    PaymentPlan plan;
 
-    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], json["plan"], json["currency"], json["message"]);
+    if (json["plan"] == "PaymentPlan.HALF") {
+      plan = PaymentPlan.HALF;
+    } else if (json["plan"] == "PaymentPlan.QUARTER") {
+      plan = PaymentPlan.QUARTER;
+    } else if (json["plan"] == "PaymentPlan.TEN") {
+      plan = PaymentPlan.TEN;
+    } else if (json["plan"] == "PaymentPlan.FIVE") {
+      plan = PaymentPlan.FIVE;
+    }
+
+    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"]);
     transaction._completed = json["completed"] == 1;
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
@@ -437,7 +448,7 @@ class AfterPayTransaction{
     return list;
   }
 
-  Map<String, dynamic> toJSON() => {
+  String toJSON() => jsonEncode({
     'payee': _payee,
     'financialTransactionID': _financialTransactionID,
     'totalAmount': _totalAmount,
@@ -447,14 +458,15 @@ class AfterPayTransaction{
     'completedTransactions' : this.convertTransactionQueueToJSON(_completedTransactions),
     'remainingTransactions' : this.convertTransactionQueueToJSON(_remainingTransactions),
     'completed' : _completed
-  };
+  });
 
   Map<String, dynamic> toMap() {
     return { "afterpayID": _financialTransactionID, "afterpayJSON": this.toJSON() };
   }
 
   static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
-    return dbRecord["afterpayJSON"];
+    var res = json.decode(dbRecord["afterpayJSON"]);
+    return res;
   }
 
   @override

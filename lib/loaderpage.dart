@@ -43,7 +43,7 @@ class _ColorLoaderPageState extends State<ColorLoaderPage> {
               var transaction = AfterPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message);
               print(transaction.toJSON());
               print(transaction.toMap());
-              //DBProvider.storeAfterpayTransaction(transaction);
+              DBProvider.storeAfterpayTransaction(transaction);
               //DBProvider.getAllTransactions();
               //DBProvider.deleteTransactionTable();
               print(transactionStatus);

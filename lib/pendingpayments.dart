@@ -20,15 +20,20 @@ class PendingPaymentsPage extends StatefulWidget {
 class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
 
   Future<List<AfterPayTransaction>> _getTransactions() async {
-    var transactions = [];
-    await DBProvider.getAllTransactions().then((transactionsList) {
-      for (var transaction in transactionsList) {
-        print(transaction.toString());
-        var json = AfterPayTransaction.fromMap(transaction);
-        transactions.add(AfterPayTransaction.fromJSON(json));
-      }
+    List<AfterPayTransaction> transactions = [];
+    var dbTransactions = List<Map<String, dynamic>>();
+
+    dbTransactions = await DBProvider.getAllTransactions().then((transactionsList) {
+      print(transactionsList[0]);
+      return transactionsList;
     });
-    print(transactions);
+
+    for (var transaction in dbTransactions) {
+      print(transaction.toString());
+      var json = AfterPayTransaction.fromMap(transaction);
+      transactions.add(AfterPayTransaction.fromJSON(json));
+    }
+
     return transactions;
   }
 
@@ -40,6 +45,8 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
+
+    //DBProvider.deleteTransactionTable();
 
     _getTransactions();
 
