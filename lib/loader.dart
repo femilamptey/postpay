@@ -1,11 +1,5 @@
-import 'dart:convert';
-import 'dart:io';
-
-import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
-
-import 'package:http/http.dart';
 
 class ColorLoader extends StatefulWidget {
 
