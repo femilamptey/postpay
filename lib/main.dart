@@ -1,6 +1,4 @@
-import 'package:afterpay/confirmpaymentpage.dart';
 import 'package:afterpay/loader.dart';
-import 'package:afterpay/loaderpage.dart';
 import 'package:afterpay/pendingpayments.dart';
 import 'package:flutter/material.dart';
 import 'package:afterpay/loginpage.dart';
