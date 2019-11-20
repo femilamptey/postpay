@@ -401,8 +401,33 @@ class AfterPayTransaction{
 
   bool get isCompleted { return this._completed; }
 
-  factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) =>
-      new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], json["plan"], json["currency"], json["message"]);
+  factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) {
+    var transactions = Queue<MOMOTransaction>();
+    var completedTransactions = Queue<MOMOTransaction>();
+    var remainingTransactions = Queue<MOMOTransaction>();
+
+    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], json["plan"], json["currency"], json["message"]);
+    transaction._completed = json["completed"] == 1;
+    transactions = _getTransactionsFromJSON(json, "transactions");
+    completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
+    remainingTransactions = _getTransactionsFromJSON(json, "remainingTransactions");
+
+    transaction._transactions = transactions;
+    transaction._completedTransactions = completedTransactions;
+    transaction._remainingTransactions = remainingTransactions;
+
+    return transaction;
+  }
+
+  static Queue<MOMOTransaction> _getTransactionsFromJSON(Map<String, dynamic> json, String object) {
+    var transactions = Queue<MOMOTransaction>();
+    for (var item in json[object]) {
+      var momoTrans = MOMOTransaction.fromJSON(item);
+      transactions.add(momoTrans);
+    }
+
+    return transactions;
+  }
 
   List<Map<String, dynamic>> convertTransactionQueueToJSON(transactionQueue) {
     List<Map<String, dynamic>> list = new List<Map<String, dynamic>>();
