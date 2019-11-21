@@ -258,11 +258,10 @@ class MTNMobileMoney {
 
 enum PaymentPlan {
   //TODO: Improve the plans and make them more descriptive.
-
-  HALF,
-  QUARTER,
-  TEN,
-  FIVE
+  HALFWEEKLY,
+  QUARTERWEEKLY,
+  TENTHWEEKLY,
+  TRUSTEDWEEKLY
 }
 
 class MOMOTransaction {
@@ -306,6 +305,7 @@ class AfterPayTransaction{
   final double _totalAmount;
   final PaymentPlan _plan;
   double _initialPaymentAmount;
+  double _remainingAmount;
   Queue<MOMOTransaction> _transactions;
   Queue<MOMOTransaction> _completedTransactions;
   Queue<MOMOTransaction> _remainingTransactions;
@@ -319,7 +319,7 @@ class AfterPayTransaction{
     _remainingTransactions = Queue<MOMOTransaction>();
 
     switch (_plan) {
-      case PaymentPlan.HALF:
+      case PaymentPlan.HALFWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.5;
         remainder = _totalAmount * 0.5;
         recurringCharge = remainder / 6;
@@ -329,8 +329,9 @@ class AfterPayTransaction{
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
+        _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.QUARTER:
+      case PaymentPlan.QUARTERWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.25;
         remainder = _totalAmount * 0.75;
         recurringCharge = remainder / 4;
@@ -340,8 +341,9 @@ class AfterPayTransaction{
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
+        _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.TEN:
+      case PaymentPlan.TENTHWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.10;
         remainder = _totalAmount * 0.90;
         recurringCharge = remainder / 2;
@@ -351,17 +353,20 @@ class AfterPayTransaction{
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
+        _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.FIVE:
+      case PaymentPlan.TRUSTEDWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.05;
         remainder = _totalAmount * 0.95;
-        recurringCharge = remainder / 7;
+        recurringCharge = remainder / 6;
         _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
         _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
         for (var i = 0; i < 7; i++) {
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
+        _remainingAmount = _totalAmount - _initialPaymentAmount;
+        break;
     }
     _completed = false;
 
@@ -412,20 +417,23 @@ class AfterPayTransaction{
 
   bool get isCompleted { return this._completed; }
 
+  double get remainingAmount => _remainingAmount;
+
   factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) {
     var transactions = Queue<MOMOTransaction>();
     var completedTransactions = Queue<MOMOTransaction>();
     var remainingTransactions = Queue<MOMOTransaction>();
+    var remainingAmount = 0.0;
     PaymentPlan plan;
 
-    if (json["plan"] == "PaymentPlan.HALF") {
-      plan = PaymentPlan.HALF;
-    } else if (json["plan"] == "PaymentPlan.QUARTER") {
-      plan = PaymentPlan.QUARTER;
-    } else if (json["plan"] == "PaymentPlan.TEN") {
-      plan = PaymentPlan.TEN;
-    } else if (json["plan"] == "PaymentPlan.FIVE") {
-      plan = PaymentPlan.FIVE;
+    if (json["plan"] == "PaymentPlan.HALFWEEKLY") {
+      plan = PaymentPlan.HALFWEEKLY;
+    } else if (json["plan"] == "PaymentPlan.QUARTERWEEKLY") {
+      plan = PaymentPlan.QUARTERWEEKLY;
+    } else if (json["plan"] == "PaymentPlan.TENTHWEEKLY") {
+      plan = PaymentPlan.TENTHWEEKLY;
+    } else if (json["plan"] == "PaymentPlan.TRUSTEDWEEKLY") {
+      plan = PaymentPlan.TRUSTEDWEEKLY;
     }
 
     var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
@@ -433,10 +441,12 @@ class AfterPayTransaction{
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
     remainingTransactions = _getTransactionsFromJSON(json, "remainingTransactions");
+    remainingAmount = json["remainingAmount"];
 
     transaction._transactions = transactions;
     transaction._completedTransactions = completedTransactions;
     transaction._remainingTransactions = remainingTransactions;
+    transaction._remainingAmount = remainingAmount;
 
     return transaction;
   }
@@ -463,6 +473,7 @@ class AfterPayTransaction{
     'payee': _payee,
     'financialTransactionID': _financialTransactionID,
     'totalAmount': _totalAmount,
+    'remainingAmount': _remainingAmount,
     'plan': _plan.toString(),
     'initialPayment' : _initialPaymentAmount,
     'transactions' : this.convertTransactionQueueToJSON(_transactions),
@@ -483,22 +494,22 @@ class AfterPayTransaction{
   @override
   String toString() {
     // TODO: implement toString
-    return "payee: ${this.payee}, financial transaction id: ${this._financialTransactionID}, total amount: ${this._totalAmount}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
+    return "payee: ${this.payee}, financial transaction id: ${this._financialTransactionID}, total amount: ${this._totalAmount}, remaining amount: ${this._remainingAmount}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
   }
 
   String planAsString() {
     switch (this.paymentPlan) {
-      case PaymentPlan.HALF:
-        return "Half";
+      case PaymentPlan.HALFWEEKLY:
+        return "Half Weekly";
         break;
-      case PaymentPlan.QUARTER:
-        return "Quarter";
+      case PaymentPlan.QUARTERWEEKLY:
+        return "Quarter Weekly";
         break;
-      case PaymentPlan.TEN:
-        return "Ten";
+      case PaymentPlan.TENTHWEEKLY:
+        return "Tenth Weekly";
         break;
-      case PaymentPlan.FIVE:
-        return "Five";
+      case PaymentPlan.TRUSTEDWEEKLY:
+        return "Trusted Weekly";
         break;
     }
   }

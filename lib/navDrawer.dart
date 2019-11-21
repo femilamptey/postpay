@@ -4,6 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
 
+import 'database.dart';
 import 'loginpage.dart';
 
 class NavDrawer extends StatelessWidget {
@@ -53,6 +54,7 @@ class NavDrawer extends StatelessWidget {
                 //DO NOTHING
               } else {
                 await storage.clear().then((onValue) {
+                  DBProvider.deleteTables();
                   Navigator.of(context).pushReplacementNamed(LoginPage.tag);
                 });
               }

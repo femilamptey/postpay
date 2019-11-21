@@ -33,10 +33,10 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
     final halfWeekly = ((0.5 * widget._amount) / 6).toStringAsFixed(2);
     final quarter = (0.25 * widget._amount).toStringAsFixed(2);
     final quarterWeekly = ((0.75 * widget._amount) / 4).toStringAsFixed(2);
-    final ten = (0.10 * widget._amount).toStringAsFixed(2);
-    final tenWeekly = ((0.90 * widget._amount) / 2).toStringAsFixed(2);
+    final tenth = (0.10 * widget._amount).toStringAsFixed(2);
+    final tenthWeekly = ((0.90 * widget._amount) / 2).toStringAsFixed(2);
     final five = (0.05 * widget._amount).toStringAsFixed(2);
-    final fiveDaily = ((0.95 * widget._amount) / 7).toStringAsFixed(2);
+    final trustedWeekly = ((0.95 * widget._amount) / 6).toStringAsFixed(2);
 
     final appBar = new AppBar(
       title: Text("Confirm Payment", style: TextStyle(color: Colors.white, fontSize: 26.0)),
@@ -54,10 +54,10 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
         Container(
           padding: const EdgeInsets.all(8),
           child: MaterialButton(
-            child: Text('50%\n\nPay $half ${widget._currency} now\n\nPay $halfWeekly weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+            child: Text('Half Weekly\n\nPay $half ${widget._currency} now\n\nPay $halfWeekly weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
-              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.HALF, widget._amount, double.parse(half), double.parse(halfWeekly), widget._currency, widget._payee, context, message: widget._message,));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.HALFWEEKLY, widget._amount, double.parse(half), double.parse(halfWeekly), widget._currency, widget._payee, context, message: widget._message,));
             },
             color: Colors.lightBlue,
           )
@@ -65,10 +65,10 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
         Container(
           padding: const EdgeInsets.all(8),
           child: MaterialButton(
-            child: Text('25%\n\nPay $quarter ${widget._currency} now\n\nPay $quarterWeekly weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+            child: Text('Quarter Weekly\n\nPay $quarter ${widget._currency} now\n\nPay $quarterWeekly weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
             onPressed: () {
               // Perform some action
-              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.QUARTER, widget._amount, double.parse(quarter), double.parse(quarterWeekly), widget._currency, widget._payee, context, message: widget._message,));
+              showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.QUARTERWEEKLY, widget._amount, double.parse(quarter), double.parse(quarterWeekly), widget._currency, widget._payee, context, message: widget._message,));
             },
             color: Colors.green,
           )
@@ -76,20 +76,20 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
         Container(
           padding: const EdgeInsets.all(8),
             child: MaterialButton(
-              child: Text('10%\n\nPay $ten ${widget._currency} now\n\nPay $tenWeekly weekly over 2 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+              child: Text('Tenth Weekly\n\nPay $tenth ${widget._currency} now\n\nPay $tenthWeekly weekly over 2 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.TEN, widget._amount, double.parse(ten), double.parse(tenWeekly), widget._currency, widget._payee, context, message: widget._message,));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.TENTHWEEKLY, widget._amount, double.parse(tenth), double.parse(tenthWeekly), widget._currency, widget._payee, context, message: widget._message,));
               },
               color: Colors.yellow,
             )        ),
         Container(
           padding: const EdgeInsets.all(8),
             child: MaterialButton(
-              child: Text('5%\n\nPay $five ${widget._currency} now\n\n Pay $fiveDaily daily over one week', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+              child: Text('Trusted Weekly\n\nPay $five ${widget._currency} now\n\n Pay $trustedWeekly weekly over six weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
               onPressed: () {
                 // Perform some action
-                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.FIVE, widget._amount, double.parse(five), double.parse(fiveDaily), widget._currency, widget._payee, context, message: widget._message,));
+                showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.TRUSTEDWEEKLY, widget._amount, double.parse(five), double.parse(trustedWeekly), widget._currency, widget._payee, context, message: widget._message,));
               },
               color: Colors.red,
             )        ),
@@ -138,22 +138,20 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
 
   Widget build(BuildContext context) {
 
-    print(widget.message);
-
     // ignore: missing_return
     Text getPlan() {
       switch (widget.selectedPlan) {
-        case PaymentPlan.HALF:
-          return Text("Plan: Half");
+        case PaymentPlan.HALFWEEKLY:
+          return Text("Plan: Half Weekly");
           break;
-        case PaymentPlan.QUARTER:
-          return Text("Plan: Quarter");
+        case PaymentPlan.QUARTERWEEKLY:
+          return Text("Plan: Quarter Weekly");
           break;
-        case PaymentPlan.TEN:
-          return Text("Plan: Ten");
+        case PaymentPlan.TENTHWEEKLY:
+          return Text("Plan: Tenth Weekly");
           break;
-        case PaymentPlan.FIVE:
-          return Text("Plan: Five");
+        case PaymentPlan.TRUSTEDWEEKLY:
+          return Text("Plan: Trusted Weekly");
           break;
       }
     }

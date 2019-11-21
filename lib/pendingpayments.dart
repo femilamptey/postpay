@@ -7,9 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-import 'homepage.dart';
-import 'loginpage.dart';
-
 class PendingPaymentsPage extends StatefulWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   static String tag = 'pending-payments-page';
@@ -25,10 +22,10 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
 
     return CircularPercentIndicator(
       radius: 35.0,
-      lineWidth: 10.0,
+      lineWidth: 6.0,
       animation: true,
-      percent: 0.5,
-      circularStrokeCap: CircularStrokeCap.square,
+      percent: (transaction.totalAmount - transaction.remainingAmount)/transaction.totalAmount,
+      circularStrokeCap: CircularStrokeCap.butt,
       progressColor: Colors.green,
       backgroundColor: Colors.red,
     );
@@ -38,7 +35,7 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
     List<AfterPayTransaction> transactions = [];
     var dbTransactions = List<Map<String, dynamic>>();
 
-    dbTransactions = await DBProvider.getAllTransactions().then((transactionsList) {
+    dbTransactions = await DBProvider.getPendingTransactions().then((transactionsList) {
       print(transactionsList[0]);
       return transactionsList;
     });
@@ -62,7 +59,7 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
         child: ListTile(
           leading: _createIndicator(transaction),
           title: Text("Transaction ${transaction.financialTransactionID}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}"),
+          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nRemaining amount: ${transaction.remainingAmount}"),
           contentPadding: EdgeInsets.all(10.0),
           onTap: () {
 
@@ -100,8 +97,9 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
             children: _generateTransactionTiles(snapshot.data),
           );
         } else {
-          return Center(child: ColorLoader());
+          return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
         }
+        return Center(child: ColorLoader());
       },
     );
 

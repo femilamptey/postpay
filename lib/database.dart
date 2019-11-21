@@ -27,37 +27,46 @@ class DBProvider {
     String path = join(documentsDirectory.path, "payments.db");
     return await openDatabase(path, version: 1, onOpen: (db) {
     }, onCreate: (Database db, int version) async {
-      await db.execute("CREATE TABLE Transactions ("
+      await db.execute("CREATE TABLE PendingTransactions ("
           "afterpayID PRIMARY KEY,"
           "afterpayJSON BLOB"
-          ")");
+          ")"
+      );
+      await db.execute("CREATE TABLE CompletedTransactions ("
+          "afterpayID PRIMARY KEY,"
+          "afterpayJSON BLOB"
+          ")"
+      );
     });
   }
 
   // ignore: missing_return
   static Future<DBStatus> storeAfterpayTransaction(AfterPayTransaction transaction) async {
     await DBProvider.database.then((database) {
-      database.insert("Transactions", transaction.toMap()).then((res) async {
+      database.insert("PendingTransactions", transaction.toMap()).then((res) async {
         print(res);
       });
     });
   }
 
   // ignore: missing_return
-  static Future<List<Map<String, dynamic>>> getAllTransactions() async {
+  static Future<List<Map<String, dynamic>>> getPendingTransactions() async {
     var res = List<Map<String, dynamic>>();
     await DBProvider.database.then((database) async {
-      res = await database.query("Transactions", columns: ["afterPayJSON"]).then((results) {
+      res = await database.query("PendingTransactions", columns: ["afterPayJSON"]).then((results) {
         return results;
       });
     });
     return res;
   }
 
-  static deleteTransactionTable() async {
+  static deleteTables() async {
     await DBProvider.database.then((database) async {
-      await database.delete("Transactions").then((number) {
+      await database.delete("PendingTransactions").then((number) async {
         print(number);
+        await database.delete("CompletedTransactions").then((number) {
+          print(number);
+        });
       });
     });
   }
