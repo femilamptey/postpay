@@ -59,7 +59,7 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
         child: ListTile(
           leading: _createIndicator(transaction),
           title: Text("Transaction ${transaction.financialTransactionID}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nRemaining amount: ${transaction.remainingAmount}"),
+          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nTotal amount: ${transaction.totalAmount}\nRemaining amount: ${transaction.remainingAmount}"),
           contentPadding: EdgeInsets.all(10.0),
           onTap: () {
 
