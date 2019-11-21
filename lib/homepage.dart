@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> {
         child: const Text('Make Payment', semanticsLabel: 'Make Payment'),
         onPressed: () {
           // Perform some action
-          showDialog(context: context, builder: (context) => initiateTransferDialog);
+          showDialog(context: context, builder: (context) => initiateTransferDialog, barrierDismissible: false);
         },
       ),
     );

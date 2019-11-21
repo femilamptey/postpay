@@ -101,7 +101,7 @@ class _LoginPageState extends State<LoginPage> {
             if (accountFieldController.text == '' || pinFieldController.text == '') {
               //Scaffold.of(context).showSnackBar(errorMessageSnackbar);
             } else {
-              login();
+              await login();
               Navigator.of(context).pushReplacementNamed(HomePage.tag);
             }
           } else {

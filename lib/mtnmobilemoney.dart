@@ -257,6 +257,8 @@ class MTNMobileMoney {
 }
 
 enum PaymentPlan {
+  //TODO: Improve the plans and make them more descriptive.
+
   HALF,
   QUARTER,
   TEN,
@@ -269,6 +271,7 @@ class MOMOTransaction {
   Might need to implement this later.
   final String financialTransactionID
   */
+  //TODO: Date and time! How could I forget?
   final double _amount;
   final String _currency;
   final String _message;
@@ -296,6 +299,8 @@ class MOMOTransaction {
 
 class AfterPayTransaction{
 
+  //TODO: Fully implement remaining amount variable and associated code.
+  //TODO: Date and time! How could I forget?
   final String _payee;
   final String _financialTransactionID;
   final double _totalAmount;
@@ -306,7 +311,7 @@ class AfterPayTransaction{
   Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message) {
+  AfterPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message, bool shouldDeduct) {
     double remainder = 0.0;
     double recurringCharge = 0.0;
     _transactions = Queue<MOMOTransaction>();
@@ -360,7 +365,9 @@ class AfterPayTransaction{
     }
     _completed = false;
 
-    _deduct(initialPayment, _totalAmount);
+    if (shouldDeduct) {
+      _deduct(initialPayment, _totalAmount);
+    }
 
   }
 
@@ -387,7 +394,11 @@ class AfterPayTransaction{
     }
   }
 
+  String get financialTransactionID => _financialTransactionID;
+
   double get initialPayment { return this._initialPaymentAmount; }
+
+  double get totalAmount => _totalAmount;
 
   String get payee { return this._payee; }
 
@@ -417,7 +428,7 @@ class AfterPayTransaction{
       plan = PaymentPlan.FIVE;
     }
 
-    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"]);
+    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
     transaction._completed = json["completed"] == 1;
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
@@ -473,6 +484,23 @@ class AfterPayTransaction{
   String toString() {
     // TODO: implement toString
     return "payee: ${this.payee}, financial transaction id: ${this._financialTransactionID}, total amount: ${this._totalAmount}, payment plan: ${this.paymentPlan}, initial payment: ${this.initialPayment}, completed: ${this.isCompleted}";
+  }
+
+  String planAsString() {
+    switch (this.paymentPlan) {
+      case PaymentPlan.HALF:
+        return "Half";
+        break;
+      case PaymentPlan.QUARTER:
+        return "Quarter";
+        break;
+      case PaymentPlan.TEN:
+        return "Ten";
+        break;
+      case PaymentPlan.FIVE:
+        return "Five";
+        break;
+    }
   }
 
 }
