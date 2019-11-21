@@ -2,6 +2,7 @@ import 'package:afterpay/database.dart';
 import 'package:afterpay/loader.dart';
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:afterpay/navDrawer.dart';
+import 'package:afterpay/transactiondetailspage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -62,7 +63,9 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
           subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nTotal amount: ${transaction.totalAmount}\nRemaining amount: ${transaction.remainingAmount}"),
           contentPadding: EdgeInsets.all(10.0),
           onTap: () {
-
+            Navigator.push(context, MaterialPageRoute(builder: (context) {
+              return TransactionDetailsPage(transaction);
+            }));
           },
         ),
       ));
