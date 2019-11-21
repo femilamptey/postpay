@@ -18,9 +18,22 @@ class TransactionDetailsPage extends StatelessWidget {
       iconTheme: IconThemeData(color: Colors.white, size: 26.0),
     );
 
+    final initiateNextPaymentButton = RaisedButton(
+      child: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 1'),
+      onPressed: () {
+        // Perform some action
+      },
+    );
+
+    var body = ListView(
+      children: <Widget>[
+
+      ],
+    );
+
     return Scaffold(
       appBar: appBar,
-      //body: ,
+      body: body,
     );
   }
 
