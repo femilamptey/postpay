@@ -1,27 +1,21 @@
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:core';
-import 'dart:ffi';
 import 'dart:io';
 
-import 'package:afterpay/account.dart';
-import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
 import 'package:alt_http/alt_http.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:uuid/uuid.dart';
 
-import 'database.dart';
-
 class MTNMobileMoney {
 
   MTNMobileMoney._();
+  // ignore: unused_field
   static final MTNMobileMoney _mtnMOMO = MTNMobileMoney._();
   static String _apiKey = '';
   static String _accessToken = '';
   static String _referenceID = '';
   static String _transactionStatus = '';
-  //static final _referenceID = 'cd0f4b28-3de1-4148-bf2e-aa3543dc5be2';
   static final _hostURL = 'sandbox.momodeveloper.mtn.com';
   static final _createAPIUserURL = '/v1_0/apiuser';
   static var _getAPIKeyURL = '/v1_0/apiuser/' + _referenceID + '/apikey';
@@ -30,7 +24,6 @@ class MTNMobileMoney {
   static final _transferMoneyURL = '/disbursement/v1_0/transfer';
   static var _checkTransferStatusURL = '/disbursement/v1_0/transfer/' + _referenceID;
 
-  static final String _collectionsKey = 'df26565ecc4c4abe94ca3f0dae9bd5c9';
   static final String _disbursementKey = 'd89864081c2749c183c7457204ffb74a';
 
   static _setReferenceID(String value) {
@@ -115,7 +108,6 @@ class MTNMobileMoney {
   static Future<HttpClientResponse> getDisbursementToken() async {
 
     String credentials = '$_referenceID:$_apiKey';
-    String basicCred = base64.encode(utf8.encode(credentials));
 
     var client = AltHttpClient();
 
@@ -131,9 +123,7 @@ class MTNMobileMoney {
       print(credentials);
       response.transform(utf8.decoder).listen((contents) {
         // handle data
-        var at = json.decode(contents)['access_token'];
         _setAccessToken(json.decode(contents)['access_token']);
-        print(_accessToken);
       }).onDone(() {
 
       });
@@ -150,7 +140,7 @@ class MTNMobileMoney {
 
     var client = AltHttpClient();
 
-    var req = await client.getUrl(Uri.https(_hostURL, _getAccountBalanceURL)).then((HttpClientRequest request) {
+    await client.getUrl(Uri.https(_hostURL, _getAccountBalanceURL)).then((HttpClientRequest request) {
       request.headers.add('Authorization', 'Bearer $_accessToken');
       request.headers.add('X-Reference-Id', _referenceID);
       request.headers.add('X-Target-Environment', 'sandbox');
@@ -158,7 +148,7 @@ class MTNMobileMoney {
       request.headers.contentType = ContentType.json;
       return request.close();
     // ignore: missing_return
-    }). then((HttpClientResponse response) {
+    }).then((HttpClientResponse response) {
       print(Uri.https(_hostURL, _getAccountBalanceURL));
       print(response.statusCode);
       print(response.reasonPhrase);
@@ -298,7 +288,6 @@ class MOMOTransaction {
 
 class AfterPayTransaction{
 
-  //TODO: Fully implement remaining amount variable and associated code.
   //TODO: Date and time! How could I forget?
   final String _payee;
   final String _financialTransactionID;

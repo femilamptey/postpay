@@ -199,7 +199,7 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
                         widget.payee, widget.message).then((response) {
                       Navigator.pop(context, 'cancel');
                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                        return ColorLoaderPage(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message);
+                        return ColorLoaderPage(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message, true);
                       }));
                     });
                   });
