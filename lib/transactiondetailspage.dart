@@ -8,6 +8,17 @@ class TransactionDetailsPage extends StatelessWidget {
 
   final AfterPayTransaction _transaction;
 
+  Text transactionDetails(AfterPayTransaction transaction) {
+    String details = "Payment plan: ${transaction.planAsString()}\n"
+        "Recurring charge: ${transaction.remainingTransactions.first.getAmount.toStringAsFixed(2)} "
+        "${transaction.remainingTransactions.first.getCurrency}\n"
+        "Number of remaining payments: ${transaction.remainingTransactions.length}\n"
+        "Remaining difference: ${transaction.remainingAmount}"
+    ;
+
+    return Text(details, style: TextStyle(color: Colors.black, fontSize: 21.0), textAlign: TextAlign.center);
+  }
+
   @override
   Widget build(BuildContext context) {
     // TODO: implement build
@@ -18,16 +29,33 @@ class TransactionDetailsPage extends StatelessWidget {
       iconTheme: IconThemeData(color: Colors.white, size: 26.0),
     );
 
-    final initiateNextPaymentButton = RaisedButton(
-      child: Text('Complete Next Transaction'),
-      onPressed: () {
-        // Perform some action
-      },
+    final initiateNextPaymentButton = Padding(
+      padding: EdgeInsets.all(8.0),
+      child: RaisedButton(
+        child: Text('Complete Next Transaction'),
+        color: Colors.black,
+        textColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(7.0)),
+        onPressed: () {
+          // Perform some action
+        },
+      )
     );
 
-    var body = Column(
+    var body = ListView(
       children: <Widget>[
-
+        Card(
+          child: ListTile(
+            title: Text("Transaction ${_transaction.financialTransactionID}", style: TextStyle(fontSize: 24.0, fontWeight: FontWeight.w500), textAlign: TextAlign.center),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            title: Text("Payee: ${_transaction.payee}", style: TextStyle(color: Colors.black, fontSize: 21.0), textAlign: TextAlign.center),
+            subtitle: transactionDetails(_transaction),
+          ),
+        ),
+        initiateNextPaymentButton
       ],
     );
 
