@@ -13,6 +13,8 @@ class TransactionDetailsPage extends StatelessWidget {
         "Recurring charge: ${transaction.remainingTransactions.first.getAmount.toStringAsFixed(2)} "
         "${transaction.remainingTransactions.first.getCurrency}\n"
         "Number of remaining payments: ${transaction.remainingTransactions.length}\n"
+        "Total charge: ${transaction.totalAmount} "
+        "${transaction.remainingTransactions.first.getCurrency}\n"
         "Remaining difference: ${transaction.remainingAmount}"
     ;
 
