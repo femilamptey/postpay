@@ -19,13 +19,13 @@ class TransactionDetailsPage extends StatelessWidget {
     );
 
     final initiateNextPaymentButton = RaisedButton(
-      child: const Text('RAISED BUTTON', semanticsLabel: 'RAISED BUTTON 1'),
+      child: Text('Complete Next Transaction'),
       onPressed: () {
         // Perform some action
       },
     );
 
-    var body = ListView(
+    var body = Column(
       children: <Widget>[
 
       ],
