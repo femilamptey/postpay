@@ -393,7 +393,7 @@ class AfterPayTransaction{
         recurringCharge = remainder / 6;
         _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
         _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
-        for (var i = 0; i < 6; i++) {
+        for (var i = 0; i < 7; i++) {
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
@@ -411,10 +411,10 @@ class AfterPayTransaction{
   _deductWhenCreatingTransaction(double initialPayment, double totalAmount) async {
     LocalStorage storage = new LocalStorage("credentials");
 
-    var currentCredBal = storage.getItem("creditBalance");
+    var currentAccBal = storage.getItem("accountBalance");
     var currentAvailBal =  storage.getItem("availableBalance");
 
-    await storage.setItem("creditBalance", currentCredBal - initialPayment);
+    await storage.setItem("accountBalance", currentAccBal - initialPayment);
     await storage.setItem("availableBalance", currentAvailBal - _totalAmount);
   }
 
@@ -422,9 +422,9 @@ class AfterPayTransaction{
 
     LocalStorage storage = new LocalStorage("credentials");
 
-    var currentCredBal = storage.getItem("creditBalance");
+    var currentAccBal = storage.getItem("accountBalance");
 
-    await storage.setItem("creditBalance", currentCredBal - amount);
+    await storage.setItem("accountBalance", currentAccBal - amount);
   }
 
   completeNextTransaction() {

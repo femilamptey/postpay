@@ -13,15 +13,13 @@ class HomePage extends StatefulWidget {
   LocalStorage storage = new LocalStorage("credentials");
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   static final List<String> _currencies = ['EUR', 'GHS'];
-  double creditBalance;
-  double availableBalance;
   double accountBalance;
+  double availableBalance;
   String _currency;
 
   HomePage() {
-    creditBalance =  storage.getItem("creditBalance");
-    availableBalance =  storage.getItem("availableBalance");
-    accountBalance = storage.getItem("accountBalance");
+    accountBalance =  storage.getItem("accountBalance");
+    availableBalance = storage.getItem("availableBalance");
     _currency = storage.getItem("currency");
   }
 
@@ -38,14 +36,11 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-    bool _switchValue = true;
-
   @override
   Widget build(BuildContext context) {
 
-    widget.creditBalance = widget.storage.getItem("creditBalance");
-    widget.availableBalance = widget.storage.getItem("availableBalance");
     widget.accountBalance = widget.storage.getItem("accountBalance");
+    widget.availableBalance = widget.storage.getItem("availableBalance");
 
     final RefreshController _refreshController = RefreshController();
 
@@ -56,55 +51,6 @@ class _HomePageState extends State<HomePage> {
     );
 
     final navDrawer = NavDrawer(HomePage.tag);
-
-    switchText() {
-      if (_switchValue) {
-        return Text("Credit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
-      } else {
-        return Text("Debit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
-      }
-    }
-
-    percent() {
-      if (_switchValue) {
-        return (widget.availableBalance)/widget.creditBalance;
-      } else {
-        return 1.0;
-      }
-    }
-    
-    accountText() {
-      if (_switchValue) {
-        return new Text(
-          "Credit Balance: ${widget.creditBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
-          style:
-          new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
-        );
-      } else {
-        return new Text(
-          "Account Balance: ${widget.accountBalance.toStringAsFixed(2)} ${widget._currency}",
-          style:
-          new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
-        );
-      }
-    }
-
-    final modeSwitch = Container(
-      child: SwitchListTile(
-        value: _switchValue,
-        title: switchText(),
-        onChanged: (bool value) {
-          setState(() {
-            _switchValue = value;
-          });
-        },
-        activeColor: Colors.red,
-        activeTrackColor: Colors.redAccent,
-        inactiveThumbColor: Colors.green,
-        inactiveTrackColor: Colors.lightGreen,
-      ),
-      width: 5.0,
-    );
 
     final logo = Hero(
       tag: 'hero',
@@ -134,9 +80,13 @@ class _HomePageState extends State<HomePage> {
       radius: 300.0,
       lineWidth: 27.0,
       animation: true,
-      percent: percent(),
+      percent: (widget.availableBalance/widget.accountBalance).abs(),
       center: makePaymentButton,
-      footer: accountText(),
+      footer: new Text(
+        "Account Balance: ${widget.accountBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
+        style:
+        new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
+      ),
       circularStrokeCap: CircularStrokeCap.square,
       progressColor: Colors.green,
       backgroundColor: Colors.red,
@@ -153,9 +103,8 @@ class _HomePageState extends State<HomePage> {
          // });
           setState(() {
             //TODO: Refresh
-            widget.creditBalance = widget.storage.getItem("creditBalance");
-            widget.availableBalance = widget.storage.getItem("availableBalance");
             widget.accountBalance = widget.storage.getItem("accountBalance");
+            widget.availableBalance = widget.storage.getItem("availableBalance");
           });
         });
         _refreshController.refreshCompleted();
@@ -168,7 +117,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
-          children: <Widget>[logo, circle, modeSwitch],
+          children: <Widget>[logo, circle],
         ),
       )
     );
