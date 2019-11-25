@@ -15,9 +15,8 @@ class ColorLoaderPage extends StatefulWidget {
   final String _currency;
   final String _message;
   final bool isContinuingPayment;
-  final AfterPayTransaction continuingTransaction;
 
-  ColorLoaderPage(this._payee, this._totalAmount, this._plan, this._currency, this._message, this.isContinuingPayment, {this.continuingTransaction});
+  ColorLoaderPage(this._payee, this._totalAmount, this._plan, this._currency, this._message, this.isContinuingPayment);
 
   @override
   State<StatefulWidget> createState() => _ColorLoaderPageState();
@@ -42,18 +41,13 @@ class _ColorLoaderPageState extends State<ColorLoaderPage> {
               //TODO: Read response from transaction status and determine if transaction failed or succeeded, and present appropriate message
               var transactionStatus = jsonDecode(MTNMobileMoney.getTransactionStatus());
               var id = transactionStatus["financialTransactionId"];
-              if (widget.isContinuingPayment && status == 200) {
-                widget.continuingTransaction.completeNextTransaction();
-                if (widget.continuingTransaction.isCompleted) {
-                  DBProvider.deletePendingTransaction(widget.continuingTransaction);
-                  DBProvider.storeCompletedTransaction(widget.continuingTransaction);
-                }
-                DBProvider.updateAfterPayTransaction(widget.continuingTransaction);
-              } else if (!widget.isContinuingPayment && status == 200) {
+              if (widget.isContinuingPayment) {
                 var transaction = AfterPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message, true);
                 print(transaction.toJSON());
                 print(transaction.toMap());
                 DBProvider.storeAfterpayTransaction(transaction);
+              } else {
+
               }
               print(transactionStatus);
               return TransactionStatusDialog(status);

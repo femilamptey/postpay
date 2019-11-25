@@ -1,4 +1,3 @@
-import 'package:afterpay/completedpayments.dart';
 import 'package:afterpay/homepage.dart';
 import 'package:afterpay/pendingpayments.dart';
 import 'package:flutter/cupertino.dart';
@@ -34,17 +33,6 @@ class NavDrawer extends StatelessWidget {
                 //DO NOTHING
               } else {
                 Navigator.of(context).pushReplacementNamed(HomePage.tag);
-              }
-            },
-          ),
-          new ListTile(
-            title: Text("Completed Payments", style: TextStyle(fontSize: 20.0)),
-            onTap: () {
-              if (currentPage == CompletedPaymentsPage.tag) {
-                //DO NOTHING
-              } else {
-                Navigator.of(context).pushReplacementNamed(
-                    CompletedPaymentsPage.tag);
               }
             },
           ),
