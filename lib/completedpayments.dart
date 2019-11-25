@@ -2,22 +2,23 @@ import 'package:afterpay/database.dart';
 import 'package:afterpay/loader.dart';
 import 'package:afterpay/mtnmobilemoney.dart';
 import 'package:afterpay/navDrawer.dart';
+import 'package:afterpay/pendingpayments.dart';
 import 'package:afterpay/transactiondetailspage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
 
-class PendingPaymentsPage extends StatefulWidget {
+class CompletedPaymentsPage extends StatefulWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  static String tag = 'pending-payments-page';
+  static String tag = 'completed-payments-page';
 
   @override
-  _PendingPaymentsPageState createState() => new _PendingPaymentsPageState();
+  _CompletedPaymentsPageState createState() => new _CompletedPaymentsPageState();
 
 }
 
-class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
+class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
 
   CircularPercentIndicator _createIndicator(AfterPayTransaction transaction) {
 
@@ -30,13 +31,14 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
       progressColor: Colors.green,
       backgroundColor: Colors.red,
     );
+
   }
 
   Future<List<AfterPayTransaction>> _getTransactions() async {
     List<AfterPayTransaction> transactions = [];
     var dbTransactions = List<Map<String, dynamic>>();
 
-    dbTransactions = await DBProvider.getPendingTransactions().then((transactionsList) {
+    dbTransactions = await DBProvider.getCompletedTransactions().then((transactionsList) {
       print(transactionsList[0]);
       return transactionsList;
     });
@@ -63,9 +65,9 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
           subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nTotal amount: ${transaction.totalAmount.toStringAsFixed(2)}\nRemaining amount: ${transaction.remainingAmount.toStringAsFixed(2)}"),
           contentPadding: EdgeInsets.all(10.0),
           onTap: () {
-            Navigator.push(context, MaterialPageRoute(builder: (context) {
+            /*Navigator.push(context, MaterialPageRoute(builder: (context) {
               return TransactionDetailsPage(transaction);
-            }));
+            }));*/
           },
         ),
       ));
@@ -83,12 +85,12 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
     final RefreshController _refreshController = RefreshController();
 
     final appBar = new AppBar(
-      title: Text("Pending Payments", style: TextStyle(color: Colors.white, fontSize: 26.0)),
+      title: Text("Completed Payments", style: TextStyle(color: Colors.white, fontSize: 26.0)),
       backgroundColor: Colors.black,
       iconTheme: IconThemeData(color: Colors.white, size: 26.0),
     );
 
-    final navDrawer = NavDrawer(PendingPaymentsPage.tag);
+    final navDrawer = NavDrawer(CompletedPaymentsPage.tag);
 
     final list = FutureBuilder<List<AfterPayTransaction>>(
       future: _getTransactions(),
@@ -100,7 +102,7 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
             children: _generateTransactionTiles(snapshot.data),
           );
         } else {
-          return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
+          return Center(child: Text("No completed payments", style: TextStyle(fontSize: 22.0)));
         }
         return Center(child: ColorLoader());
       },
