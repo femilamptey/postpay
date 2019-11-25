@@ -23,9 +23,11 @@ class _LoginPageState extends State<LoginPage> {
     await widget.storage.ready.then((isReady) async {
       await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
         await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
-          await widget.storage.setItem("accountBalance", 5000.00).then((onValue) async {
-            await widget.storage.setItem("availableBalance", 4400.00).then((onValue) async {
-              await widget.storage.setItem("currency", "EUR").then((onValue) async {
+          await widget.storage.setItem("creditBalance", 1000.00).then((onValue) async {
+            await widget.storage.setItem("availableBalance", 1000.00).then((onValue) async {
+              await widget.storage.setItem("accountBalance", 5000.00).then((onValue) async {
+                await widget.storage.setItem("currency", "EUR").then((onValue) async {
+                });
               });
             });
           });

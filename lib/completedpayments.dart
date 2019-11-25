@@ -26,7 +26,7 @@ class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
       radius: 35.0,
       lineWidth: 6.0,
       animation: true,
-      percent: (transaction.totalAmount - transaction.remainingAmount)/transaction.totalAmount,
+      percent: 1.0,
       circularStrokeCap: CircularStrokeCap.butt,
       progressColor: Colors.green,
       backgroundColor: Colors.red,
