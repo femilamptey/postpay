@@ -38,7 +38,7 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
-    bool _switchValue = true;
+    bool _isCredit = true;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +58,7 @@ class _HomePageState extends State<HomePage> {
     final navDrawer = NavDrawer(HomePage.tag);
 
     switchText() {
-      if (_switchValue) {
+      if (_isCredit) {
         return Text("Credit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
       } else {
         return Text("Debit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
     }
 
     percent() {
-      if (_switchValue) {
+      if (_isCredit) {
         return (widget.availableBalance)/widget.creditBalance;
       } else {
         return 1.0;
@@ -74,7 +74,7 @@ class _HomePageState extends State<HomePage> {
     }
     
     accountText() {
-      if (_switchValue) {
+      if (_isCredit) {
         return new Text(
           "Credit Balance: ${widget.creditBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
           style:
@@ -91,11 +91,11 @@ class _HomePageState extends State<HomePage> {
 
     final modeSwitch = Container(
       child: SwitchListTile(
-        value: _switchValue,
+        value: _isCredit,
         title: switchText(),
         onChanged: (bool value) {
           setState(() {
-            _switchValue = value;
+            _isCredit = value;
           });
         },
         activeColor: Colors.red,
@@ -114,7 +114,7 @@ class _HomePageState extends State<HomePage> {
       ),
     );
 
-    final initiateTransferDialog = new InitiateTransferDialog();
+    final initiateTransferDialog = new InitiateTransferDialog(_isCredit);
 
     final makePaymentButton = Padding(
       padding: EdgeInsets.all(8.0),
@@ -196,10 +196,11 @@ class _HomePageState extends State<HomePage> {
 }
 
 class InitiateTransferDialog extends StatefulWidget {
-  InitiateTransferDialog({this.onValueChange, this.initialValue});
+  InitiateTransferDialog(this.isCredit, {this.onValueChange, this.initialValue});
   LocalStorage storage = new LocalStorage("credentials");
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool isCredit;
   final String initialValue;
   final void Function(String) onValueChange;
 
@@ -232,6 +233,14 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
     String message = '';
     String MOMOPin;
 
+    switchText() {
+      if (widget.isCredit) {
+        return Text("Credit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      } else {
+        return Text("Debit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      }
+    }
+
     final payeeFieldController = TextEditingController();
     final amountFieldController = TextEditingController();
     final messageFieldController = TextEditingController();
@@ -243,6 +252,21 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
         width:  200.00,
         child: ListView(
           children: <Widget>[
+            new Container(child: SwitchListTile(
+                value: widget.isCredit,
+                title: switchText(),
+                onChanged: (bool value) {
+                  setState(() {
+                    widget.isCredit = value;
+                  });
+                },
+                activeColor: Colors.red,
+                activeTrackColor: Colors.redAccent,
+                inactiveThumbColor: Colors.green,
+                inactiveTrackColor: Colors.lightGreen,
+              ),
+              width: 5.0,
+            ),
             new Container(child: new TextField(
               keyboardType: TextInputType.number,
               decoration: new InputDecoration(
@@ -252,7 +276,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
                 payee = text;
               },
               controller: payeeFieldController,
-            ),
+              ),
             ),
             new Container(child: new TextField(
               keyboardType: TextInputType.number,
@@ -327,7 +351,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
                     MaterialPageRoute(
                       builder: (context) =>
                           ConfirmPaymentPage(
-                              payee, amount, _currency, message, MOMOPin),
+                              payee, amount, _currency, message, MOMOPin, widget.isCredit),
                     ));
               } else {
                 print(MOMOPin);
