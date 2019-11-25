@@ -1,3 +1,4 @@
+import 'package:afterpay/completedpayments.dart';
 import 'package:afterpay/loader.dart';
 import 'package:afterpay/pendingpayments.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ class MyApp extends StatefulWidget {
   final routes = <String, WidgetBuilder>{
     LoginPage.tag: (context) => LoginPage(),
     HomePage.tag: (context) => HomePage(),
+    CompletedPaymentsPage.tag: (context) => CompletedPaymentsPage(),
     PendingPaymentsPage.tag: (context) => PendingPaymentsPage(),
   };
 

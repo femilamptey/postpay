@@ -194,12 +194,12 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
               MTNMobileMoney.createAPIUser().then((response) {
                 MTNMobileMoney.getAPIKey().then((response) {
                   MTNMobileMoney.getDisbursementToken().then((response) {
-                    MTNMobileMoney.transferMoney(
+                    MTNMobileMoney.initiateAfterPayTransaction(
                         widget.upFrontPaymentAmount, widget.currency,
                         widget.payee, widget.message).then((response) {
                       Navigator.pop(context, 'cancel');
                       Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {
-                        return ColorLoaderPage(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message, true);
+                        return ColorLoaderPage(widget.payee, widget.amount, widget.selectedPlan, widget.currency, widget.message, false);
                       }));
                     });
                   });

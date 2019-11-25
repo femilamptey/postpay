@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
+import 'package:afterpay/database.dart';
 import 'package:alt_http/alt_http.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:uuid/uuid.dart';
@@ -169,7 +170,49 @@ class MTNMobileMoney {
 
   }
 
-  static Future<HttpClientResponse> transferMoney(double amount, String currency, String payee, String message) async {
+  static Future<HttpClientResponse> initiateAfterPayTransaction(double amount, String currency, String payee, String message) async {
+
+    var data = {
+      "amount": "$amount",
+      "currency": "$currency",
+      "externalId": "12345",
+      "payee": {
+        "partyIdType": "MSISDN",
+        "partyId": "$payee"
+      },
+      "payerMessage": "$message",
+      "payeeNote": "test note"
+    };
+
+    var body = json.encode(data);
+
+    print(body);
+
+    var client = AltHttpClient();
+
+    HttpClientResponse response = await client.postUrl(Uri.https(_hostURL, _transferMoneyURL)).then((HttpClientRequest request) {
+      request.headers.add('Authorization', 'Bearer $_accessToken');
+      request.headers.add('X-Reference-Id', _referenceID);
+      request.headers.add('X-Target-Environment', 'sandbox');
+      request.headers.add('Ocp-Apim-Subscription-Key', _disbursementKey);
+      request.headers.contentType = ContentType.json;
+      request.write(body);
+      return request.close();
+    }). then((HttpClientResponse response) {
+      print(Uri.https(_hostURL, _transferMoneyURL));
+      print(response.statusCode);
+      print(response.reasonPhrase);
+      response.transform(utf8.decoder).listen((contents) {
+        // handle data
+        print(json.decode(contents));
+      });
+      return response;
+    });
+
+    return response;
+  }
+
+  static Future<HttpClientResponse> payNextAfterPayTransaction(double amount, String currency, String payee, String message) async {
 
     var data = {
       "amount": "$amount",
@@ -360,12 +403,12 @@ class AfterPayTransaction{
     _completed = false;
 
     if (shouldDeduct) {
-      _deduct(initialPayment, _totalAmount);
+      _deductWhenCreatingTransaction(initialPayment, _totalAmount);
     }
 
   }
 
-  _deduct(double initialPayment, double totalAmount) async {
+  _deductWhenCreatingTransaction(double initialPayment, double totalAmount) async {
     LocalStorage storage = new LocalStorage("credentials");
 
     var currentAccBal = storage.getItem("accountBalance");
@@ -375,17 +418,33 @@ class AfterPayTransaction{
     await storage.setItem("availableBalance", currentAvailBal - _totalAmount);
   }
 
+  _deductWhenCompletingNextTransaction(double amount) async {
+
+    LocalStorage storage = new LocalStorage("credentials");
+
+    var currentAccBal = storage.getItem("accountBalance");
+
+    await storage.setItem("accountBalance", currentAccBal - amount);
+  }
+
   completeNextTransaction() {
+
     if (this.isCompleted == false) {
-      var nextTransaction = _remainingTransactions.removeFirst();
-      //TODO: Process the next transaction. If successful, add it to the _completedTransactions, if not, return it to the first of the _remainingTransactions
-      if (_remainingTransactions.isEmpty) {
-        _completed = true;
+
+      var completedTransaction = _remainingTransactions.removeFirst();
+
+      print("${_remainingTransactions.length} lovely");
+
+      if (_remainingTransactions.length == 0) {
+        this.completed = true;
       }
-      _completedTransactions.add(nextTransaction);
-    } else {
-      //TODO: Notify them that it's a completed transaction.
+
+      this.remainingAmount -= completedTransaction.getAmount;
+      _deductWhenCompletingNextTransaction(completedTransaction.getAmount);
+
+      _completedTransactions.add(completedTransaction);
     }
+
   }
 
   String get financialTransactionID => _financialTransactionID;
@@ -408,6 +467,10 @@ class AfterPayTransaction{
 
   double get remainingAmount => _remainingAmount;
 
+  set remainingAmount(double value) { _remainingAmount = value; }
+
+  set completed(bool value) { _completed = value; }
+
   factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) {
     var transactions = Queue<MOMOTransaction>();
     var completedTransactions = Queue<MOMOTransaction>();
@@ -426,7 +489,7 @@ class AfterPayTransaction{
     }
 
     var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
-    transaction._completed = json["completed"] == 1;
+    transaction._completed = json["completed"] == true;
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
     remainingTransactions = _getTransactionsFromJSON(json, "remainingTransactions");
