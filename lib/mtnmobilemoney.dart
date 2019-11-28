@@ -609,11 +609,11 @@ class PostPayTransaction {
   });
 
   Map<String, dynamic> toMap() {
-    return { "postPayID": _financialTransactionID, "postPayJSON": this.toJSON() };
+    return { "postpayID": _financialTransactionID, "postpayJSON": this.toJSON() };
   }
 
   static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
-    var res = json.decode(dbRecord["postPayJSON"]);
+    var res = json.decode(dbRecord["postpayJSON"]);
     return res;
   }
 

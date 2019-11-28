@@ -57,7 +57,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
           Container(
               padding: const EdgeInsets.all(8),
               child: MaterialButton(
-                child: Text('8 Week Payoff\n\nPay $credit8Weeks weekly over 8 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                child: Text('8 Week Payoff\n\nPay $credit8Weeks ${widget._currency} weekly over 8 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
                   showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT8WEEKS, widget._amount, double.parse(credit8Weeks), widget._currency, widget._payee, context, message: widget._message,));
@@ -68,7 +68,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
           Container(
               padding: const EdgeInsets.all(8),
               child: MaterialButton(
-                child: Text('6 Week Payoff\n\nPay $credit6Weeks weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                child: Text('6 Week Payoff\n\nPay $credit6Weeks ${widget._currency} weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
                   showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT6WEEKS, double.parse(quarter), double.parse(credit6Weeks), widget._currency, widget._payee, context, message: widget._message,));
@@ -79,7 +79,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
           Container(
               padding: const EdgeInsets.all(8),
               child: MaterialButton(
-                child: Text('4 Week Payoff\n\nPay $credit4Weeks weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                child: Text('4 Week Payoff\n\nPay $credit4Weeks ${widget._currency} weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
                   showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT4WEEKS, double.parse(tenth), double.parse(credit4Weeks), widget._currency, widget._payee, context, message: widget._message,));
@@ -89,7 +89,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
           Container(
               padding: const EdgeInsets.all(8),
               child: MaterialButton(
-                child: Text('10 Week Payoff\n\nPay $trustedWeeklyDebit weekly over 10 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                child: Text('10 Week Payoff\n\nPay $credit10Weeks ${widget._currency} weekly over 10 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
                   showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT10WEEKS, double.parse(five), double.parse(credit10Weeks), widget._currency, widget._payee, context, message: widget._message,));
@@ -134,7 +134,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
           Container(
               padding: const EdgeInsets.all(8),
               child: MaterialButton(
-                child: Text('Trusted Weekly\n\nPay $five ${widget._currency} now\n\n Pay $trustedWeeklyDebit weekly over six weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
+                child: Text('Trusted Weekly\n\nPay $five ${widget._currency} now\n\n Pay $trustedWeeklyDebit weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
                   showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.DEBITTRUSTEDWEEKLY, widget._amount, double.parse(trustedWeeklyDebit), widget._currency, widget._payee, context, message: widget._message, upFrontPaymentAmount: double.parse(five)));

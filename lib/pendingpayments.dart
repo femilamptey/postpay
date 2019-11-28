@@ -94,18 +94,14 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
     final list = FutureBuilder<List<PostPayTransaction>>(
       future: _getTransactions(),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.done) {
-          if (snapshot.hasData) {
-            return ListView(
-              physics: ScrollPhysics(),
-              padding: EdgeInsets.zero,
-              children: _generateTransactionTiles(snapshot.data),
-            );
-          } else {
-            return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
-          }
+        if (snapshot.hasData) {
+          return ListView(
+            physics: ScrollPhysics(),
+            padding: EdgeInsets.zero,
+            children: _generateTransactionTiles(snapshot.data),
+          );
         } else {
-          return Center(child: ColorLoader());
+          return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
         }
       },
     );
