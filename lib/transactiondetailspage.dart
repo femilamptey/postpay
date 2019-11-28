@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:afterpay/mtnmobilemoney.dart';
+import 'package:postpay/mtnmobilemoney.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +14,7 @@ class TransactionDetailsPage extends StatefulWidget {
     this._nextTransaction = this._transaction.remainingTransactions.first;
   }
 
-  final AfterPayTransaction _transaction;
+  final PostPayTransaction _transaction;
   MOMOTransaction _nextTransaction;
 
   @override
@@ -24,7 +24,7 @@ class TransactionDetailsPage extends StatefulWidget {
 
 class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
 
-  Text transactionDetails(AfterPayTransaction transaction, MOMOTransaction nextTransaction) {
+  Text transactionDetails(PostPayTransaction transaction, MOMOTransaction nextTransaction) {
     String details = "Payment plan: ${transaction.planAsString()}\n"
         "Recurring charge: ${nextTransaction.getAmount.toStringAsFixed(2)} "
         "${nextTransaction.getCurrency}\n"
@@ -67,7 +67,7 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
             MTNMobileMoney.createAPIUser().then((onValue) {
               MTNMobileMoney.getAPIKey().then((onValue) {
                 MTNMobileMoney.getDisbursementToken().then((onValue) {
-                  MTNMobileMoney.payNextAfterPayTransaction(widget._nextTransaction.getAmount, widget._nextTransaction.getCurrency, widget._transaction.payee, widget._nextTransaction.getMessage)
+                  MTNMobileMoney.payNextPostPayTransaction(widget._nextTransaction.getAmount, widget._nextTransaction.getCurrency, widget._transaction.payee, widget._nextTransaction.getMessage)
                   .then((onValue) {
                     Navigator.pop(context);
                     Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) {

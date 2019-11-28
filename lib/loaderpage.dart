@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:afterpay/database.dart';
-import 'package:afterpay/mtnmobilemoney.dart';
+import 'package:postpay/database.dart';
+import 'package:postpay/mtnmobilemoney.dart';
 import 'package:flutter/material.dart';
 import 'loader.dart';
 
@@ -15,7 +15,7 @@ class ColorLoaderPage extends StatefulWidget {
   final String _currency;
   final String _message;
   final bool isContinuingPayment;
-  final AfterPayTransaction continuingTransaction;
+  final PostPayTransaction continuingTransaction;
 
   ColorLoaderPage(this._payee, this._totalAmount, this._plan, this._currency, this._message, this.isContinuingPayment, {this.continuingTransaction});
 
@@ -48,12 +48,12 @@ class _ColorLoaderPageState extends State<ColorLoaderPage> {
                   DBProvider.deletePendingTransaction(widget.continuingTransaction);
                   DBProvider.storeCompletedTransaction(widget.continuingTransaction);
                 }
-                DBProvider.updateAfterPayTransaction(widget.continuingTransaction);
+                DBProvider.updatePostPayTransaction(widget.continuingTransaction);
               } else if (!widget.isContinuingPayment && status == 200) {
-                var transaction = AfterPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message, true);
+                var transaction = PostPayTransaction(widget._payee, id, widget._totalAmount, widget._plan, widget._currency, widget._message, true);
                 print(transaction.toJSON());
                 print(transaction.toMap());
-                DBProvider.storeAfterpayTransaction(transaction);
+                DBProvider.storePostPayTransaction(transaction);
               }
               print(transactionStatus);
               return TransactionStatusDialog(status);

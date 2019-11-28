@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:afterpay/homepage.dart';
-import 'package:afterpay/database.dart';
+import 'package:postpay/homepage.dart';
+import 'package:postpay/database.dart';
 import 'package:localstorage/localstorage.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,9 +23,11 @@ class _LoginPageState extends State<LoginPage> {
     await widget.storage.ready.then((isReady) async {
       await widget.storage.setItem("account", accountFieldController.text).then((onValue) async {
         await widget.storage.setItem("pin", pinFieldController.text).then((onValue) async {
-          await widget.storage.setItem("accountBalance", 5000.00).then((onValue) async {
-            await widget.storage.setItem("availableBalance", 4400.00).then((onValue) async {
-              await widget.storage.setItem("currency", "EUR").then((onValue) async {
+          await widget.storage.setItem("creditBalance", 1000.00).then((onValue) async {
+            await widget.storage.setItem("availableBalance", 1000.00).then((onValue) async {
+              await widget.storage.setItem("accountBalance", 5000.00).then((onValue) async {
+                await widget.storage.setItem("currency", "EUR").then((onValue) async {
+                });
               });
             });
           });
@@ -40,7 +42,7 @@ class _LoginPageState extends State<LoginPage> {
     final logo = SizedBox(
       child: Hero(
         tag: 'hero',
-        child: Image.asset('assets/heading.jpeg'),
+        child: Image.asset('assets/heading.png'),
         ),
     );
 

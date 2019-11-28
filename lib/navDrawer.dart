@@ -1,6 +1,6 @@
-import 'package:afterpay/completedpayments.dart';
-import 'package:afterpay/homepage.dart';
-import 'package:afterpay/pendingpayments.dart';
+import 'package:postpay/completedpayments.dart';
+import 'package:postpay/homepage.dart';
+import 'package:postpay/pendingpayments.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';

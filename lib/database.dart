@@ -28,20 +28,20 @@ class DBProvider {
     return await openDatabase(path, version: 1, onOpen: (db) {
     }, onCreate: (Database db, int version) async {
       await db.execute("CREATE TABLE PendingTransactions ("
-          "afterpayID PRIMARY KEY,"
-          "afterpayJSON BLOB"
+          "postpayID PRIMARY KEY,"
+          "postpayJSON BLOB"
           ")"
       );
       await db.execute("CREATE TABLE CompletedTransactions ("
-          "afterpayID PRIMARY KEY,"
-          "afterpayJSON BLOB"
+          "postpayID PRIMARY KEY,"
+          "postpayJSON BLOB"
           ")"
       );
     });
   }
 
   // ignore: missing_return
-  static Future<DBStatus> storeAfterpayTransaction(AfterPayTransaction transaction) async {
+  static Future<DBStatus> storePostPayTransaction(PostPayTransaction transaction) async {
     await DBProvider.database.then((database) {
       database.insert("PendingTransactions", transaction.toMap()).then((res) async {
         print(res);
@@ -49,7 +49,7 @@ class DBProvider {
     });
   }
 
-  static Future<DBStatus> storeCompletedTransaction(AfterPayTransaction transaction) async {
+  static Future<DBStatus> storeCompletedTransaction(PostPayTransaction transaction) async {
     await DBProvider.database.then((database) {
       database.insert("CompletedTransactions", transaction.toMap()).then((res) async {
         print(res);
@@ -57,9 +57,9 @@ class DBProvider {
     });
   }
 
-  static Future<DBStatus> updateAfterPayTransaction(AfterPayTransaction transaction) async {
+  static Future<DBStatus> updatePostPayTransaction(PostPayTransaction transaction) async {
     await DBProvider.database.then((database) {
-      database.update("PendingTransactions", transaction.toMap(), where: "afterpayID = ?", whereArgs: [transaction.toMap()["afterpayID"]]).then((res) async {
+      database.update("PendingTransactions", transaction.toMap(), where: "postpayID = ?", whereArgs: [transaction.toMap()["postpayID"]]).then((res) async {
         print(res);
       });
     });
@@ -69,7 +69,7 @@ class DBProvider {
   static Future<List<Map<String, dynamic>>> getPendingTransactions() async {
     var res = List<Map<String, dynamic>>();
     await DBProvider.database.then((database) async {
-      res = await database.query("PendingTransactions", columns: ["afterPayJSON"]).then((results) {
+      res = await database.query("PendingTransactions", columns: ["postpayJSON"]).then((results) {
         return results;
       });
     });
@@ -79,7 +79,7 @@ class DBProvider {
   static Future<List<Map<String, dynamic>>> getCompletedTransactions() async {
     var res = List<Map<String, dynamic>>();
     await DBProvider.database.then((database) async {
-      res = await database.query("CompletedTransactions", columns: ["afterPayJSON"]).then((results) {
+      res = await database.query("CompletedTransactions", columns: ["postpayJSON"]).then((results) {
         return results;
       });
     });
@@ -88,10 +88,10 @@ class DBProvider {
 
 
   // ignore: missing_return
-  static Future<int> deletePendingTransaction(AfterPayTransaction transaction) async {
+  static Future<int> deletePendingTransaction(PostPayTransaction transaction) async {
     int res;
     await DBProvider.database.then((database) async {
-      res = await database.delete("PendingTransactions", where: "afterpayID = ?", whereArgs: [transaction.toMap()["afterpayID"]]).then((results) {
+      res = await database.delete("PendingTransactions", where: "postpayID = ?", whereArgs: [transaction.toMap()["postpayID"]]).then((results) {
         print("${res} check");
         return results;
       });

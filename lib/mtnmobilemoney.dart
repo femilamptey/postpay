@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:afterpay/database.dart';
 import 'package:alt_http/alt_http.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:uuid/uuid.dart';
@@ -170,7 +169,7 @@ class MTNMobileMoney {
 
   }
 
-  static Future<HttpClientResponse> initiateAfterPayTransaction(double amount, String currency, String payee, String message) async {
+  static Future<HttpClientResponse> initiatePostPayTransaction(double amount, String currency, String payee, String message) async {
 
     var data = {
       "amount": "$amount",
@@ -212,7 +211,7 @@ class MTNMobileMoney {
     return response;
   }
 
-  static Future<HttpClientResponse> payNextAfterPayTransaction(double amount, String currency, String payee, String message) async {
+  static Future<HttpClientResponse> payNextPostPayTransaction(double amount, String currency, String payee, String message) async {
 
     var data = {
       "amount": "$amount",
@@ -289,12 +288,21 @@ class MTNMobileMoney {
 
 }
 
+enum PaymentType {
+  CREDIT,
+  DEBIT
+}
+
 enum PaymentPlan {
   //TODO: Improve the plans and make them more descriptive.
-  HALFWEEKLY,
-  QUARTERWEEKLY,
-  TENTHWEEKLY,
-  TRUSTEDWEEKLY
+  CREDIT8WEEKS,
+  CREDIT6WEEKS,
+  CREDIT4WEEKS,
+  CREDIT10WEEKS,
+  DEBITHALFWEEKLY,
+  DEBITQUARTERWEEKLY,
+  DEBITTENTHWEEKLY,
+  DEBITTRUSTEDWEEKLY
 }
 
 class MOMOTransaction {
@@ -329,7 +337,7 @@ class MOMOTransaction {
 
 }
 
-class AfterPayTransaction{
+class PostPayTransaction {
 
   //TODO: Date and time! How could I forget?
   final String _payee;
@@ -343,7 +351,8 @@ class AfterPayTransaction{
   Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message, bool shouldDeduct) {
+  PostPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message, bool shouldDeduct) {
+
     double remainder = 0.0;
     double recurringCharge = 0.0;
     _transactions = Queue<MOMOTransaction>();
@@ -351,7 +360,43 @@ class AfterPayTransaction{
     _remainingTransactions = Queue<MOMOTransaction>();
 
     switch (_plan) {
-      case PaymentPlan.HALFWEEKLY:
+      case PaymentPlan.CREDIT8WEEKS:
+        _initialPaymentAmount = 0;
+        _remainingAmount = _totalAmount;
+        recurringCharge = _totalAmount / 8;
+        for (var i = 0; i < 8; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.CREDIT6WEEKS:
+        _initialPaymentAmount = 0;
+        _remainingAmount = _totalAmount;
+        recurringCharge = _totalAmount / 6;
+        for (var i = 0; i < 6; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.CREDIT4WEEKS:
+        _initialPaymentAmount = 0;
+        _remainingAmount = _totalAmount;
+        recurringCharge = _totalAmount / 4;
+        for (var i = 0; i < 4; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.CREDIT10WEEKS:
+        _initialPaymentAmount = 0;
+        _remainingAmount = _totalAmount;
+        recurringCharge = _totalAmount / 10;
+        for (var i = 0; i < 10; i++) {
+          _transactions.add(MOMOTransaction(recurringCharge, currency, message));
+          _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
+        }
+        break;
+      case PaymentPlan.DEBITHALFWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.5;
         remainder = _totalAmount * 0.5;
         recurringCharge = remainder / 6;
@@ -363,7 +408,7 @@ class AfterPayTransaction{
         }
         _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.QUARTERWEEKLY:
+      case PaymentPlan.DEBITQUARTERWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.25;
         remainder = _totalAmount * 0.75;
         recurringCharge = remainder / 4;
@@ -375,7 +420,7 @@ class AfterPayTransaction{
         }
         _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.TENTHWEEKLY:
+      case PaymentPlan.DEBITTENTHWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.10;
         remainder = _totalAmount * 0.90;
         recurringCharge = remainder / 2;
@@ -387,18 +432,19 @@ class AfterPayTransaction{
         }
         _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
-      case PaymentPlan.TRUSTEDWEEKLY:
+      case PaymentPlan.DEBITTRUSTEDWEEKLY:
         _initialPaymentAmount = _totalAmount * 0.05;
         remainder = _totalAmount * 0.95;
         recurringCharge = remainder / 6;
         _transactions.addFirst(MOMOTransaction(initialPayment, currency, message));
         _completedTransactions.add(MOMOTransaction(initialPayment, currency, message));
-        for (var i = 0; i < 7; i++) {
+        for (var i = 0; i < 6; i++) {
           _transactions.add(MOMOTransaction(recurringCharge, currency, message));
           _remainingTransactions.add(MOMOTransaction(recurringCharge, currency, message));
         }
         _remainingAmount = _totalAmount - _initialPaymentAmount;
         break;
+
     }
     _completed = false;
 
@@ -409,22 +455,42 @@ class AfterPayTransaction{
   }
 
   _deductWhenCreatingTransaction(double initialPayment, double totalAmount) async {
+
     LocalStorage storage = new LocalStorage("credentials");
 
-    var currentAccBal = storage.getItem("accountBalance");
-    var currentAvailBal =  storage.getItem("availableBalance");
+    if (this.paymentPlan.toString().contains("DEBIT")) {
 
-    await storage.setItem("accountBalance", currentAccBal - initialPayment);
-    await storage.setItem("availableBalance", currentAvailBal - _totalAmount);
+      var currentAccountBal = storage.getItem("accountBalance");
+      await storage.setItem("accountBalance", currentAccountBal - initialPayment);
+
+    } else if (this.paymentPlan.toString().contains("CREDIT")) {
+
+      var currentAvailBal =  storage.getItem("availableBalance");
+      await storage.setItem("availableBalance", currentAvailBal - _totalAmount);
+
+    }
+
   }
 
   _deductWhenCompletingNextTransaction(double amount) async {
 
     LocalStorage storage = new LocalStorage("credentials");
 
-    var currentAccBal = storage.getItem("accountBalance");
+    if (this.paymentPlan.toString().contains("DEBIT")) {
 
-    await storage.setItem("accountBalance", currentAccBal - amount);
+      var currentAccountBalance = storage.getItem("accountBalance");
+      await storage.setItem("accountBalance", currentAccountBalance - amount);
+
+    } else if (this.paymentPlan.toString().contains("CREDIT")) {
+
+      var currentAvailableBal = storage.getItem("availableBalance");
+      var currentAccountBalance = storage.getItem("accountBalance");
+
+      await storage.setItem("availableBalance", currentAvailableBal + amount);
+      await storage.setItem("accountBalance", currentAccountBalance - amount);
+
+    }
+
   }
 
   completeNextTransaction() {
@@ -471,24 +537,32 @@ class AfterPayTransaction{
 
   set completed(bool value) { _completed = value; }
 
-  factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) {
+  factory PostPayTransaction.fromJSON(Map<String, dynamic> json) {
     var transactions = Queue<MOMOTransaction>();
     var completedTransactions = Queue<MOMOTransaction>();
     var remainingTransactions = Queue<MOMOTransaction>();
     var remainingAmount = 0.0;
     PaymentPlan plan;
 
-    if (json["plan"] == "PaymentPlan.HALFWEEKLY") {
-      plan = PaymentPlan.HALFWEEKLY;
-    } else if (json["plan"] == "PaymentPlan.QUARTERWEEKLY") {
-      plan = PaymentPlan.QUARTERWEEKLY;
-    } else if (json["plan"] == "PaymentPlan.TENTHWEEKLY") {
-      plan = PaymentPlan.TENTHWEEKLY;
-    } else if (json["plan"] == "PaymentPlan.TRUSTEDWEEKLY") {
-      plan = PaymentPlan.TRUSTEDWEEKLY;
+    if (json["plan"] == PaymentPlan.DEBITHALFWEEKLY.toString()) {
+      plan = PaymentPlan.DEBITHALFWEEKLY;
+    } else if (json["plan"] == PaymentPlan.DEBITQUARTERWEEKLY.toString()) {
+      plan = PaymentPlan.DEBITQUARTERWEEKLY;
+    } else if (json["plan"] == PaymentPlan.DEBITTENTHWEEKLY.toString()) {
+      plan = PaymentPlan.DEBITTENTHWEEKLY;
+    } else if (json["plan"] == PaymentPlan.DEBITTRUSTEDWEEKLY.toString()) {
+      plan = PaymentPlan.DEBITTRUSTEDWEEKLY;
+    } else if (json["plan"] == PaymentPlan.CREDIT8WEEKS.toString()) {
+      plan = PaymentPlan.CREDIT8WEEKS;
+    } else if (json["plan"] == PaymentPlan.CREDIT6WEEKS.toString()) {
+      plan = PaymentPlan.CREDIT6WEEKS;
+    } else if (json["plan"] == PaymentPlan.CREDIT4WEEKS.toString()) {
+      plan = PaymentPlan.CREDIT4WEEKS;
+    } else if (json["plan"] == PaymentPlan.CREDIT10WEEKS.toString()) {
+      plan = PaymentPlan.CREDIT10WEEKS;
     }
 
-    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
+    var transaction = new PostPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
     transaction._completed = json["completed"] == true;
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
@@ -535,11 +609,11 @@ class AfterPayTransaction{
   });
 
   Map<String, dynamic> toMap() {
-    return { "afterpayID": _financialTransactionID, "afterpayJSON": this.toJSON() };
+    return { "postPayID": _financialTransactionID, "postPayJSON": this.toJSON() };
   }
 
   static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
-    var res = json.decode(dbRecord["afterpayJSON"]);
+    var res = json.decode(dbRecord["postPayJSON"]);
     return res;
   }
 
@@ -551,18 +625,31 @@ class AfterPayTransaction{
 
   String planAsString() {
     switch (this.paymentPlan) {
-      case PaymentPlan.HALFWEEKLY:
+      case PaymentPlan.CREDIT8WEEKS:
+        return "8 Week Payoff by Credit";
+        break;
+      case PaymentPlan.CREDIT6WEEKS:
+        return "6 Week Payoff by Credit";
+        break;
+      case PaymentPlan.CREDIT4WEEKS:
+        return "4 Week Payoff by Credit";
+        break;
+      case PaymentPlan.CREDIT10WEEKS:
+        return "10 Week Payoff by Credit";
+        break;
+      case PaymentPlan.DEBITHALFWEEKLY:
         return "Half Weekly";
         break;
-      case PaymentPlan.QUARTERWEEKLY:
+      case PaymentPlan.DEBITQUARTERWEEKLY:
         return "Quarter Weekly";
         break;
-      case PaymentPlan.TENTHWEEKLY:
+      case PaymentPlan.DEBITTENTHWEEKLY:
         return "Tenth Weekly";
         break;
-      case PaymentPlan.TRUSTEDWEEKLY:
+      case PaymentPlan.DEBITTRUSTEDWEEKLY:
         return "Trusted Weekly";
         break;
+
     }
   }
 

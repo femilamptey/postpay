@@ -1,9 +1,9 @@
-import 'package:afterpay/database.dart';
-import 'package:afterpay/loader.dart';
-import 'package:afterpay/mtnmobilemoney.dart';
-import 'package:afterpay/navDrawer.dart';
-import 'package:afterpay/pendingpayments.dart';
-import 'package:afterpay/transactiondetailspage.dart';
+import 'package:postpay/database.dart';
+import 'package:postpay/loader.dart';
+import 'package:postpay/mtnmobilemoney.dart';
+import 'package:postpay/navDrawer.dart';
+import 'package:postpay/pendingpayments.dart';
+import 'package:postpay/transactiondetailspage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
@@ -20,13 +20,13 @@ class CompletedPaymentsPage extends StatefulWidget {
 
 class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
 
-  CircularPercentIndicator _createIndicator(AfterPayTransaction transaction) {
+  CircularPercentIndicator _createIndicator(PostPayTransaction transaction) {
 
     return CircularPercentIndicator(
       radius: 35.0,
       lineWidth: 6.0,
       animation: true,
-      percent: (transaction.totalAmount - transaction.remainingAmount)/transaction.totalAmount,
+      percent: 1.0,
       circularStrokeCap: CircularStrokeCap.butt,
       progressColor: Colors.green,
       backgroundColor: Colors.red,
@@ -34,8 +34,8 @@ class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
 
   }
 
-  Future<List<AfterPayTransaction>> _getTransactions() async {
-    List<AfterPayTransaction> transactions = [];
+  Future<List<PostPayTransaction>> _getTransactions() async {
+    List<PostPayTransaction> transactions = [];
     var dbTransactions = List<Map<String, dynamic>>();
 
     dbTransactions = await DBProvider.getCompletedTransactions().then((transactionsList) {
@@ -45,15 +45,15 @@ class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
 
     for (var transaction in dbTransactions) {
       print(transaction.toString());
-      var json = AfterPayTransaction.fromMap(transaction);
-      transactions.add(AfterPayTransaction.fromJSON(json));
+      var json = PostPayTransaction.fromMap(transaction);
+      transactions.add(PostPayTransaction.fromJSON(json));
     }
 
     print(transactions);
     return transactions;
   }
 
-  List<Card> _generateTransactionTiles(List<AfterPayTransaction> transactions) {
+  List<Card> _generateTransactionTiles(List<PostPayTransaction> transactions) {
     //TODO: ADD CODE TO GENERATE LIST TILES FOR EACH TRANSACTION
     var transactionTiles = List<Card>();
 
@@ -92,19 +92,22 @@ class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
 
     final navDrawer = NavDrawer(CompletedPaymentsPage.tag);
 
-    final list = FutureBuilder<List<AfterPayTransaction>>(
+    final list = FutureBuilder<List<PostPayTransaction>>(
       future: _getTransactions(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView(
-            physics: ScrollPhysics(),
-            padding: EdgeInsets.zero,
-            children: _generateTransactionTiles(snapshot.data),
-          );
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            return ListView(
+              physics: ScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: _generateTransactionTiles(snapshot.data),
+            );
+          } else {
+            return Center(child: Text("No completed payments", style: TextStyle(fontSize: 22.0)));
+          }
         } else {
-          return Center(child: Text("No completed payments", style: TextStyle(fontSize: 22.0)));
+          return Center(child: ColorLoader());
         }
-        return Center(child: ColorLoader());
       },
     );
 

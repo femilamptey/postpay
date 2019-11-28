@@ -1,6 +1,6 @@
-import 'package:afterpay/confirmpaymentpage.dart';
-import 'package:afterpay/database.dart';
-import 'package:afterpay/navDrawer.dart';
+import 'package:postpay/confirmpaymentpage.dart';
+import 'package:postpay/database.dart';
+import 'package:postpay/navDrawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
@@ -13,13 +13,15 @@ class HomePage extends StatefulWidget {
   LocalStorage storage = new LocalStorage("credentials");
   final _scaffoldKey = GlobalKey<ScaffoldState>();
   static final List<String> _currencies = ['EUR', 'GHS'];
-  double accountBalance;
+  double creditBalance;
   double availableBalance;
+  double accountBalance;
   String _currency;
 
   HomePage() {
-    accountBalance =  storage.getItem("accountBalance");
-    availableBalance = storage.getItem("availableBalance");
+    creditBalance =  storage.getItem("creditBalance");
+    availableBalance =  storage.getItem("availableBalance");
+    accountBalance = storage.getItem("accountBalance");
     _currency = storage.getItem("currency");
   }
 
@@ -36,11 +38,14 @@ class _HomePageState extends State<HomePage> {
     super.initState();
   }
 
+    bool _isCredit = true;
+
   @override
   Widget build(BuildContext context) {
 
-    widget.accountBalance = widget.storage.getItem("accountBalance");
+    widget.creditBalance = widget.storage.getItem("creditBalance");
     widget.availableBalance = widget.storage.getItem("availableBalance");
+    widget.accountBalance = widget.storage.getItem("accountBalance");
 
     final RefreshController _refreshController = RefreshController();
 
@@ -52,15 +57,64 @@ class _HomePageState extends State<HomePage> {
 
     final navDrawer = NavDrawer(HomePage.tag);
 
+    switchText() {
+      if (_isCredit) {
+        return Text("Credit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      } else {
+        return Text("Debit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      }
+    }
+
+    percent() {
+      if (_isCredit) {
+        return (widget.availableBalance)/widget.creditBalance;
+      } else {
+        return 1.0;
+      }
+    }
+    
+    accountText() {
+      if (_isCredit) {
+        return new Text(
+          "Credit Balance: ${widget.creditBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
+          style:
+          new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
+        );
+      } else {
+        return new Text(
+          "Account Balance: ${widget.accountBalance.toStringAsFixed(2)} ${widget._currency}",
+          style:
+          new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
+        );
+      }
+    }
+
+    final modeSwitch = Container(
+      child: SwitchListTile(
+        value: _isCredit,
+        title: switchText(),
+        onChanged: (bool value) {
+          setState(() {
+            _isCredit = value;
+          });
+        },
+        activeColor: Colors.red,
+        activeTrackColor: Colors.redAccent,
+        inactiveThumbColor: Colors.green,
+        inactiveTrackColor: Colors.lightGreen,
+      ),
+      width: 5.0,
+    );
+
     final logo = Hero(
       tag: 'hero',
       child: Padding(
         padding: EdgeInsets.all(30.0),
-          child: Image.asset('assets/heading.jpeg')
+          child: Image.asset('assets/heading.png')
       ),
     );
 
-    final initiateTransferDialog = new InitiateTransferDialog();
+    final initiateTransferDialog = new InitiateTransferDialog(_isCredit);
 
     final makePaymentButton = Padding(
       padding: EdgeInsets.all(8.0),
@@ -80,13 +134,9 @@ class _HomePageState extends State<HomePage> {
       radius: 300.0,
       lineWidth: 27.0,
       animation: true,
-      percent: (widget.availableBalance/widget.accountBalance).abs(),
+      percent: percent(),
       center: makePaymentButton,
-      footer: new Text(
-        "Account Balance: ${widget.accountBalance.toStringAsFixed(2)} ${widget._currency} \nAvailable Balance: ${widget.availableBalance.toStringAsFixed(2)} ${widget._currency}",
-        style:
-        new TextStyle(fontWeight: FontWeight.bold, fontSize: 21.0),
-      ),
+      footer: accountText(),
       circularStrokeCap: CircularStrokeCap.square,
       progressColor: Colors.green,
       backgroundColor: Colors.red,
@@ -103,8 +153,9 @@ class _HomePageState extends State<HomePage> {
          // });
           setState(() {
             //TODO: Refresh
-            widget.accountBalance = widget.storage.getItem("accountBalance");
+            widget.creditBalance = widget.storage.getItem("creditBalance");
             widget.availableBalance = widget.storage.getItem("availableBalance");
+            widget.accountBalance = widget.storage.getItem("accountBalance");
           });
         });
         _refreshController.refreshCompleted();
@@ -117,7 +168,7 @@ class _HomePageState extends State<HomePage> {
         ),
         child: ListView(
           physics: NeverScrollableScrollPhysics(),
-          children: <Widget>[logo, circle],
+          children: <Widget>[logo, circle, modeSwitch],
         ),
       )
     );
@@ -145,10 +196,11 @@ class _HomePageState extends State<HomePage> {
 }
 
 class InitiateTransferDialog extends StatefulWidget {
-  InitiateTransferDialog({this.onValueChange, this.initialValue});
+  InitiateTransferDialog(this.isCredit, {this.onValueChange, this.initialValue});
   LocalStorage storage = new LocalStorage("credentials");
   final _scaffoldKey = GlobalKey<ScaffoldState>();
 
+  bool isCredit;
   final String initialValue;
   final void Function(String) onValueChange;
 
@@ -181,6 +233,14 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
     String message = '';
     String MOMOPin;
 
+    switchText() {
+      if (widget.isCredit) {
+        return Text("Credit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      } else {
+        return Text("Debit", style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500));
+      }
+    }
+
     final payeeFieldController = TextEditingController();
     final amountFieldController = TextEditingController();
     final messageFieldController = TextEditingController();
@@ -192,6 +252,21 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
         width:  200.00,
         child: ListView(
           children: <Widget>[
+            new Container(child: SwitchListTile(
+                value: widget.isCredit,
+                title: switchText(),
+                onChanged: (bool value) {
+                  setState(() {
+                    widget.isCredit = value;
+                  });
+                },
+                activeColor: Colors.red,
+                activeTrackColor: Colors.redAccent,
+                inactiveThumbColor: Colors.green,
+                inactiveTrackColor: Colors.lightGreen,
+              ),
+              width: 5.0,
+            ),
             new Container(child: new TextField(
               keyboardType: TextInputType.number,
               decoration: new InputDecoration(
@@ -201,7 +276,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
                 payee = text;
               },
               controller: payeeFieldController,
-            ),
+              ),
             ),
             new Container(child: new TextField(
               keyboardType: TextInputType.number,
@@ -276,7 +351,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
                     MaterialPageRoute(
                       builder: (context) =>
                           ConfirmPaymentPage(
-                              payee, amount, _currency, message, MOMOPin),
+                              payee, amount, _currency, message, MOMOPin, widget.isCredit),
                     ));
               } else {
                 print(MOMOPin);

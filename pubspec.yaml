@@ -1,4 +1,4 @@
-name: afterpay
+name: postpay
 description: A new Flutter project.
 
 # The following defines the version and build number for your application.
@@ -50,7 +50,7 @@ flutter:
   uses-material-design: true
   assets:
     - assets/icon.png
-    - assets/heading.jpeg
+    - assets/heading.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:

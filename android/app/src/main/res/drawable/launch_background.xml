@@ -7,6 +7,6 @@
     <item>
         <bitmap
             android:gravity="fill"
-            android:src="@drawable/afterpay" />
+            android:src="@drawable/postpay" />
     </item>
 </layer-list>

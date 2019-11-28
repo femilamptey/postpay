@@ -1,4 +1,4 @@
-package com.example.afterpay;
+package com.example.postpay;
 
 import android.os.Bundle;
 import io.flutter.app.FlutterActivity;
