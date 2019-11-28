@@ -71,7 +71,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
                 child: Text('6 Week Payoff\n\nPay $credit6Weeks ${widget._currency} weekly over 6 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
-                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT6WEEKS, double.parse(quarter), double.parse(credit6Weeks), widget._currency, widget._payee, context, message: widget._message,));
+                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT6WEEKS, widget._amount, double.parse(credit6Weeks), widget._currency, widget._payee, context, message: widget._message,));
                 },
                 color: Colors.green,
               )
@@ -82,7 +82,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
                 child: Text('4 Week Payoff\n\nPay $credit4Weeks ${widget._currency} weekly over 4 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
-                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT4WEEKS, double.parse(tenth), double.parse(credit4Weeks), widget._currency, widget._payee, context, message: widget._message,));
+                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT4WEEKS, widget._amount, double.parse(credit4Weeks), widget._currency, widget._payee, context, message: widget._message,));
                 },
                 color: Colors.yellow,
               )        ),
@@ -92,7 +92,7 @@ class ConfirmPaymentPageState extends State<ConfirmPaymentPage> {
                 child: Text('10 Week Payoff\n\nPay $credit10Weeks ${widget._currency} weekly over 10 weeks', style: TextStyle(fontSize: 16), textAlign: TextAlign.center),
                 onPressed: () {
                   // Perform some action
-                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT10WEEKS, double.parse(five), double.parse(credit10Weeks), widget._currency, widget._payee, context, message: widget._message,));
+                  showDialog(context: context, barrierDismissible: false, builder: (context) => new ConfirmationDialog(PaymentPlan.CREDIT10WEEKS, widget._amount, double.parse(credit10Weeks), widget._currency, widget._payee, context, message: widget._message,));
                 },
                 color: Colors.red,
               )        ),
