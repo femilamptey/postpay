@@ -110,7 +110,7 @@ class TransactionStatusDialogState extends State<TransactionStatusDialog> {
       contentText = "There was an error with the server. Kindly try again later.";
     } else {
       titleText = "Success";
-      contentText = "Afterpay payment successful.";
+      contentText = "PostPay payment successful.";
     }
 
     return new AlertDialog(
