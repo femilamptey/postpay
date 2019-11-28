@@ -62,7 +62,7 @@ class _CompletedPaymentsPageState extends State<CompletedPaymentsPage> {
         child: ListTile(
           leading: _createIndicator(transaction),
           title: Text("Transaction ${transaction.financialTransactionID}", style: TextStyle(fontSize: 20, fontWeight: FontWeight.w500)),
-          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nTotal amount: ${transaction.totalAmount.toStringAsFixed(2)}\nRemaining amount: ${transaction.remainingAmount.toStringAsFixed(2)}"),
+          subtitle: Text("Plan: ${transaction.planAsString()}\nPaid to: ${transaction.payee}\nTotal amount: ${transaction.totalAmount.toStringAsFixed(2)} ${transaction.allTransactions.first.getCurrency}\nRemaining amount: ${transaction.remainingAmount.toStringAsFixed(2)} ${transaction.allTransactions.first.getCurrency}"),
           contentPadding: EdgeInsets.all(10.0),
           onTap: () {
             /*Navigator.push(context, MaterialPageRoute(builder: (context) {

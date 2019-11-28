@@ -29,9 +29,10 @@ class _TransactionDetailsPageState extends State<TransactionDetailsPage> {
         "Recurring charge: ${nextTransaction.getAmount.toStringAsFixed(2)} "
         "${nextTransaction.getCurrency}\n"
         "Number of remaining payments: ${transaction.remainingTransactions.length}\n"
-        "Total charge: ${transaction.totalAmount} "
+        "Total charge: ${transaction.totalAmount.toStringAsFixed(2)} "
         "${nextTransaction.getCurrency}\n"
-        "Remaining difference: ${transaction.remainingAmount.toStringAsFixed(2)}"
+        "Remaining difference: ${transaction.remainingAmount.toStringAsFixed(2)} "
+        "${nextTransaction.getCurrency}"
     ;
 
     return Text(details, style: TextStyle(color: Colors.black, fontSize: 21.0), textAlign: TextAlign.center);
