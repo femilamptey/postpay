@@ -1,6 +1,6 @@
-import 'package:afterpay/loader.dart';
-import 'package:afterpay/loaderpage.dart';
-import 'package:afterpay/mtnmobilemoney.dart';
+import 'package:postpay/loader.dart';
+import 'package:postpay/loaderpage.dart';
+import 'package:postpay/mtnmobilemoney.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
@@ -268,7 +268,7 @@ class ConfirmationDialogState extends State<ConfirmationDialog> {
               MTNMobileMoney.createAPIUser().then((response) {
                 MTNMobileMoney.getAPIKey().then((response) {
                   MTNMobileMoney.getDisbursementToken().then((response) {
-                    MTNMobileMoney.initiateAfterPayTransaction(
+                    MTNMobileMoney.initiatePostPayTransaction(
                         widget.upFrontPaymentAmount != 0.0 ? widget.upFrontPaymentAmount: widget.amount, widget.currency,
                         widget.payee, widget.message).then((response) {
                       Navigator.pop(context, 'cancel');

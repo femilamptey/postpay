@@ -1,6 +1,6 @@
-import 'package:afterpay/confirmpaymentpage.dart';
-import 'package:afterpay/database.dart';
-import 'package:afterpay/navDrawer.dart';
+import 'package:postpay/confirmpaymentpage.dart';
+import 'package:postpay/database.dart';
+import 'package:postpay/navDrawer.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:localstorage/localstorage.dart';
@@ -110,7 +110,7 @@ class _HomePageState extends State<HomePage> {
       tag: 'hero',
       child: Padding(
         padding: EdgeInsets.all(30.0),
-          child: Image.asset('assets/heading.jpeg')
+          child: Image.asset('assets/heading.png')
       ),
     );
 

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:core';
 import 'dart:io';
 
-import 'package:afterpay/database.dart';
 import 'package:alt_http/alt_http.dart';
 import 'package:localstorage/localstorage.dart';
 import 'package:uuid/uuid.dart';
@@ -170,7 +169,7 @@ class MTNMobileMoney {
 
   }
 
-  static Future<HttpClientResponse> initiateAfterPayTransaction(double amount, String currency, String payee, String message) async {
+  static Future<HttpClientResponse> initiatePostPayTransaction(double amount, String currency, String payee, String message) async {
 
     var data = {
       "amount": "$amount",
@@ -212,7 +211,7 @@ class MTNMobileMoney {
     return response;
   }
 
-  static Future<HttpClientResponse> payNextAfterPayTransaction(double amount, String currency, String payee, String message) async {
+  static Future<HttpClientResponse> payNextPostPayTransaction(double amount, String currency, String payee, String message) async {
 
     var data = {
       "amount": "$amount",
@@ -338,7 +337,7 @@ class MOMOTransaction {
 
 }
 
-class AfterPayTransaction{
+class PostPayTransaction {
 
   //TODO: Date and time! How could I forget?
   final String _payee;
@@ -352,7 +351,7 @@ class AfterPayTransaction{
   Queue<MOMOTransaction> _remainingTransactions;
   bool _completed;
 
-  AfterPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message, bool shouldDeduct) {
+  PostPayTransaction(this._payee, this._financialTransactionID, this._totalAmount, this._plan, String currency, String message, bool shouldDeduct) {
 
     double remainder = 0.0;
     double recurringCharge = 0.0;
@@ -538,7 +537,7 @@ class AfterPayTransaction{
 
   set completed(bool value) { _completed = value; }
 
-  factory AfterPayTransaction.fromJSON(Map<String, dynamic> json) {
+  factory PostPayTransaction.fromJSON(Map<String, dynamic> json) {
     var transactions = Queue<MOMOTransaction>();
     var completedTransactions = Queue<MOMOTransaction>();
     var remainingTransactions = Queue<MOMOTransaction>();
@@ -563,7 +562,7 @@ class AfterPayTransaction{
       plan = PaymentPlan.CREDIT10WEEKS;
     }
 
-    var transaction = new AfterPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
+    var transaction = new PostPayTransaction(json["payee"], json["financialTransactionID"], json["totalAmount"], plan, json["currency"], json["message"], false);
     transaction._completed = json["completed"] == true;
     transactions = _getTransactionsFromJSON(json, "transactions");
     completedTransactions = _getTransactionsFromJSON(json, "completedTransactions");
@@ -610,11 +609,11 @@ class AfterPayTransaction{
   });
 
   Map<String, dynamic> toMap() {
-    return { "afterpayID": _financialTransactionID, "afterpayJSON": this.toJSON() };
+    return { "postPayID": _financialTransactionID, "postPayJSON": this.toJSON() };
   }
 
   static Map<String, dynamic> fromMap(Map<String, dynamic> dbRecord) {
-    var res = json.decode(dbRecord["afterpayJSON"]);
+    var res = json.decode(dbRecord["postPayJSON"]);
     return res;
   }
 

@@ -1,12 +1,13 @@
-import 'package:afterpay/database.dart';
-import 'package:afterpay/loader.dart';
-import 'package:afterpay/mtnmobilemoney.dart';
-import 'package:afterpay/navDrawer.dart';
-import 'package:afterpay/transactiondetailspage.dart';
+import 'package:postpay/transactiondetailspage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:percent_indicator/circular_percent_indicator.dart';
 import 'package:pull_to_refresh/pull_to_refresh.dart';
+
+import 'database.dart';
+import 'loader.dart';
+import 'mtnmobilemoney.dart';
+import 'navDrawer.dart';
 
 class PendingPaymentsPage extends StatefulWidget {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
@@ -19,7 +20,7 @@ class PendingPaymentsPage extends StatefulWidget {
 
 class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
 
-  CircularPercentIndicator _createIndicator(AfterPayTransaction transaction) {
+  CircularPercentIndicator _createIndicator(PostPayTransaction transaction) {
 
     return CircularPercentIndicator(
       radius: 35.0,
@@ -32,8 +33,8 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
     );
   }
 
-  Future<List<AfterPayTransaction>> _getTransactions() async {
-    List<AfterPayTransaction> transactions = [];
+  Future<List<PostPayTransaction>> _getTransactions() async {
+    List<PostPayTransaction> transactions = [];
     var dbTransactions = List<Map<String, dynamic>>();
 
     dbTransactions = await DBProvider.getPendingTransactions().then((transactionsList) {
@@ -43,15 +44,15 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
 
     for (var transaction in dbTransactions) {
       print(transaction.toString());
-      var json = AfterPayTransaction.fromMap(transaction);
-      transactions.add(AfterPayTransaction.fromJSON(json));
+      var json = PostPayTransaction.fromMap(transaction);
+      transactions.add(PostPayTransaction.fromJSON(json));
     }
 
     print(transactions);
     return transactions;
   }
 
-  List<Card> _generateTransactionTiles(List<AfterPayTransaction> transactions) {
+  List<Card> _generateTransactionTiles(List<PostPayTransaction> transactions) {
     //TODO: ADD CODE TO GENERATE LIST TILES FOR EACH TRANSACTION
     var transactionTiles = List<Card>();
 
@@ -90,19 +91,22 @@ class _PendingPaymentsPageState extends State<PendingPaymentsPage> {
 
     final navDrawer = NavDrawer(PendingPaymentsPage.tag);
 
-    final list = FutureBuilder<List<AfterPayTransaction>>(
+    final list = FutureBuilder<List<PostPayTransaction>>(
       future: _getTransactions(),
       builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return ListView(
-            physics: ScrollPhysics(),
-            padding: EdgeInsets.zero,
-            children: _generateTransactionTiles(snapshot.data),
-          );
+        if (snapshot.connectionState == ConnectionState.done) {
+          if (snapshot.hasData) {
+            return ListView(
+              physics: ScrollPhysics(),
+              padding: EdgeInsets.zero,
+              children: _generateTransactionTiles(snapshot.data),
+            );
+          } else {
+            return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
+          }
         } else {
-          return Center(child: Text("No pending payments", style: TextStyle(fontSize: 22.0)));
+          return Center(child: ColorLoader());
         }
-        return Center(child: ColorLoader());
       },
     );
 
