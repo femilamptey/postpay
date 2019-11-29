@@ -248,7 +248,7 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
 
     return new AlertDialog(
       content: Container(
-        height: 300.00,
+        height: 360.00,
         width:  200.00,
         child: ListView(
           children: <Widget>[
