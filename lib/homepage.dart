@@ -252,7 +252,8 @@ class InitiateTransferDialogState extends State<InitiateTransferDialog> {
         width:  200.00,
         child: ListView(
           children: <Widget>[
-            new Container(child: SwitchListTile(
+            new Container(
+              child: SwitchListTile(
                 value: widget.isCredit,
                 title: switchText(),
                 onChanged: (bool value) {
